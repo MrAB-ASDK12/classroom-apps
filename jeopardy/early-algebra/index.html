@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Early Algebra Jeopardy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#06103a; --tile:#0c1fa3; --tile-hi:#1630d0; --used:#0a1450;
+    --gold:#ffcc33; --ink:#ffffff; --muted:#9fb0ff; --good:#2fbf71; --bad:#e5484d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(ellipse at top,#0d1c6b 0%,var(--bg) 70%);color:var(--ink);
+       font-family:Lexend,system-ui,sans-serif;display:flex;flex-direction:column;min-height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px 6px;flex-wrap:wrap}
+  h1{font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;letter-spacing:2px;margin:0;font-size:clamp(28px,4vw,48px);color:var(--gold);text-shadow:3px 3px 0 #000}
+  .tools{display:flex;gap:8px;flex-wrap:wrap}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:8px;padding:8px 14px;font-weight:600;font-size:14px}
+  .ghost{background:rgba(255,255,255,.1);color:var(--ink)}
+  .ghost:hover{background:rgba(255,255,255,.2)}
+
+  main{flex:1;padding:8px 20px;display:flex;flex-direction:column;gap:14px}
+  .board{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;flex:1;min-height:420px}
+  .cat{background:var(--tile);border:3px solid #000;display:flex;align-items:center;justify-content:center;text-align:center;
+       font-family:"Bebas Neue",Impact,sans-serif;font-size:clamp(16px,2.2vw,30px);letter-spacing:1px;padding:10px 6px;line-height:1.05;
+       text-shadow:2px 2px 0 #000;min-height:80px}
+  .tile{background:var(--tile);border:3px solid #000;color:var(--gold);font-family:"Bebas Neue",Impact,sans-serif;
+        font-size:clamp(30px,4.5vw,64px);text-shadow:3px 3px 0 #000;border-radius:0;padding:0;transition:transform .12s,background .12s}
+  .tile:hover:not(:disabled){background:var(--tile-hi);transform:scale(1.03)}
+  .tile:disabled{background:var(--used);color:transparent;text-shadow:none;cursor:default}
+
+  .teams{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding-bottom:16px}
+  .team{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 14px;min-width:170px;text-align:center}
+  .team .name{font-weight:700;font-size:18px;outline:none;border-bottom:1px dashed transparent;padding:0 4px}
+  .team .name:focus{border-bottom-color:var(--muted)}
+  .team .score{font-family:"Bebas Neue",Impact,sans-serif;font-size:42px;color:var(--gold);line-height:1;margin:4px 0}
+  .team .score.neg{color:#ff8a8d}
+  .team .adj{display:flex;gap:6px;justify-content:center}
+  .team .adj button{padding:4px 10px;font-size:13px}
+
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(2,6,30,.92);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+  .overlay.open{display:flex}
+  .card{background:var(--tile);border:4px solid #000;box-shadow:0 20px 60px rgba(0,0,0,.6);width:min(1000px,100%);max-height:100%;overflow:auto;
+        padding:28px clamp(18px,4vw,48px);text-align:center;display:flex;flex-direction:column;gap:18px}
+  .card .meta{font-family:"Bebas Neue",Impact,sans-serif;font-size:26px;letter-spacing:1px;color:var(--gold)}
+  .card .q{font-size:clamp(22px,3.2vw,40px);line-height:1.35;font-weight:600;text-shadow:2px 2px 0 rgba(0,0,0,.5)}
+  .card .a{font-size:clamp(20px,2.8vw,34px);color:var(--gold);font-weight:700;display:none;border-top:2px solid rgba(255,255,255,.25);padding-top:16px}
+  .card .a .why{display:block;font-size:clamp(14px,1.6vw,20px);color:#dfe6ff;font-weight:400;margin-top:8px}
+  .card.show-a .a{display:block}
+  .actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .primary{background:var(--gold);color:#111;font-size:18px;padding:10px 22px}
+  .award{background:var(--good);color:#fff}
+  .deduct{background:var(--bad);color:#fff}
+  .award-row{display:none;flex-direction:column;gap:8px}
+  .card.show-a .award-row{display:flex}
+  .award-row .label{font-size:14px;color:var(--muted)}
+  .team-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+  .team-actions .grp{display:flex;gap:4px;background:rgba(0,0,0,.25);padding:4px;border-radius:10px;align-items:center}
+  .team-actions .grp span{font-size:13px;padding:0 6px}
+
+  /* fractions */
+  .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.8em;line-height:1.05;margin:0 .1em}
+  .frac>span:first-child{border-bottom:.08em solid currentColor;padding:0 .15em}
+  .frac>span:last-child{padding:0 .15em}
+
+  /* answer key */
+  .key .card{text-align:left;max-width:1100px}
+  .key h2{font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;color:var(--gold);margin:8px 0 0;font-size:28px;letter-spacing:1px}
+  .key table{width:100%;border-collapse:collapse;font-size:15px}
+  .key td{border-top:1px solid rgba(255,255,255,.18);padding:8px 6px;vertical-align:top}
+  .key td:first-child{color:var(--gold);font-weight:700;width:52px}
+  .key td:last-child{color:var(--gold);font-weight:600;width:28%}
+  .confirm{display:none;gap:8px;align-items:center}
+  .confirm.open{display:flex}
+</style>
+</head>
+<body>
+<header>
+  <h1>Early Algebra Jeopardy</h1>
+  <div class="tools">
+    <button class="ghost" id="teamMinus" title="Remove a team">− Team</button>
+    <button class="ghost" id="teamPlus" title="Add a team">+ Team</button>
+    <button class="ghost" id="keyBtn">Answer Key</button>
+    <button class="ghost" id="resetBtn">New Game</button>
+    <span class="confirm" id="resetConfirm">
+      <span style="font-size:14px">Reset board &amp; scores?</span>
+      <button class="deduct" id="resetYes">Yes</button>
+      <button class="ghost" id="resetNo">No</button>
+    </span>
+  </div>
+</header>
+
+<main>
+  <div class="board" id="board"></div>
+  <div class="teams" id="teams"></div>
+</main>
+
+<div class="overlay" id="qOverlay">
+  <div class="card" id="qCard">
+    <div class="meta" id="qMeta"></div>
+    <div class="q" id="qText"></div>
+    <div class="a" id="aText"></div>
+    <div class="actions" id="revealRow">
+      <button class="primary" id="revealBtn">Show Answer</button>
+    </div>
+    <div class="award-row">
+      <div class="label">Award or deduct points</div>
+      <div class="team-actions" id="awardBtns"></div>
+      <div class="actions"><button class="primary" id="doneBtn">Back to Board</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay key" id="keyOverlay">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="meta">Teacher Answer Key</div>
+      <button class="ghost" id="keyClose">Close</button>
+    </div>
+    <div id="keyBody"></div>
+  </div>
+</div>
+
+<script>
+const f = (n,d) => `<span class="frac"><span>${n}</span><span>${d}</span></span>`;
+
+const CATEGORIES = [
+  { name: "Combine Like Terms", clues: [
+    { q: "Simplify: 2x + 6x", a: "8x" },
+    { q: "Simplify: 9y − 4y + 3", a: "5y + 3", why: "9y − 4y = 5y; the 3 has no like term" },
+    { q: "Simplify: 5m + 7 − 2m − 10", a: "3m − 3", why: "5m − 2m = 3m and 7 − 10 = −3" },
+    { q: "Kai has x stickers. Lena has 3 times as many as Kai. Omar has 5 fewer than Lena. Write a simplified expression for the total number of stickers.", a: "7x − 5 stickers", why: "x + 3x + (3x − 5) = 7x − 5" },
+    { q: "A triangle has sides that measure (2x + 3), (4x − 1), and (x + 5) inches. Write a simplified expression for its perimeter.", a: "7x + 7 inches", why: "2x + 4x + x = 7x and 3 − 1 + 5 = 7" }
+  ]},
+  { name: "Balancing Equations", clues: [
+    { q: "Solve: x + 7 = 12", a: "x = 5", why: "Subtract 7 from both sides" },
+    { q: "Solve: 4n = 36", a: "n = 9", why: "Divide both sides by 4" },
+    { q: "Solve: 3x − 5 = 16", a: "x = 7", why: "Add 5: 3x = 21. Divide by 3: x = 7" },
+    { q: "Four friends split the cost of a pizza equally. Then each one pays $3 for a drink. Each person paid $8 in all. Write and solve an equation to find what the pizza cost.", a: "$20", why: `${f("p",4)} + 3 = 8 → ${f("p",4)} = 5 → p = 20` },
+    { q: "A gym charges a $25 sign-up fee plus $15 per month. Jada has paid $160 in all. Write and solve an equation to find how many months she has been a member.", a: "9 months", why: "25 + 15m = 160 → 15m = 135 → m = 9" }
+  ]},
+  { name: "Combine Like Terms (Complex)", clues: [
+    { q: "Simplify: 3(x + 4) + 2x", a: "5x + 12", why: "3x + 12 + 2x = 5x + 12" },
+    { q: "Simplify: 5a − 2(a − 3)", a: "3a + 6", why: "5a − 2a + 6 = 3a + 6 (−2 × −3 = +6)" },
+    { q: `Simplify: ${f(1,2)}(8x − 6) + 3(x + 1)`, a: "7x", why: "4x − 3 + 3x + 3 = 7x (the constants cancel!)" },
+    { q: "Ms. Lee buys 4 packs of markers that cost (x + 2) dollars each and 3 notebooks that cost (2x − 1) dollars each. She uses a $5 coupon. Write a simplified expression for her total cost.", a: "10x dollars", why: "4(x + 2) + 3(2x − 1) − 5 = 4x + 8 + 6x − 3 − 5 = 10x" },
+    { q: "A square has sides of length (3x − 2). A rectangle has length (x + 4) and width (2x − 3). Write a simplified expression for how much longer the square's perimeter is than the rectangle's.", a: "6x − 10", why: "4(3x − 2) − [2(x + 4) + 2(2x − 3)] = (12x − 8) − (6x + 2) = 6x − 10" }
+  ]},
+  { name: "Balancing Equations II", clues: [
+    { q: "Solve: 2(x + 3) = 14", a: "x = 4", why: "2x + 6 = 14 → 2x = 8 → x = 4" },
+    { q: "Solve: 5x + 4 = 3x + 18", a: "x = 7", why: "Subtract 3x: 2x + 4 = 18 → 2x = 14 → x = 7" },
+    { q: "Solve: 3(2x − 1) = 4x + 9", a: "x = 6", why: "6x − 3 = 4x + 9 → 2x = 12 → x = 6" },
+    { q: "Gym A charges a $40 joining fee plus $25 per month. Gym B charges a $10 joining fee plus $35 per month. After how many months will both gyms cost the same?", a: "3 months", why: "40 + 25m = 10 + 35m → 30 = 10m → m = 3 (both cost $115)" },
+    { q: "Ava is 3 times as old as her brother. In 6 years, she will be twice as old as he is. How old are Ava and her brother now?", a: "Ava is 18, her brother is 6", why: "Let b = brother's age: 3b + 6 = 2(b + 6) → 3b + 6 = 2b + 12 → b = 6" }
+  ]},
+  { name: "Trivia", clues: [
+    { q: "In the term 5x, what do we call the number 5?", a: "The coefficient" },
+    { q: "The word \"algebra\" comes from a word in which language?", a: "Arabic (al-jabr, \"restoring\" or \"reuniting broken parts\")" },
+    { q: "What is the smallest prime number?", a: "2", why: "It is also the only even prime" },
+    { q: "How many feet are in one mile?", a: "5,280 feet" },
+    { q: "This 9th-century Persian mathematician wrote the book that gave algebra its name. His name also gave us the word \"algorithm.\" Who was he?", a: "Muhammad ibn Musa al-Khwarizmi" }
+  ]}
+];
+const VALUES = [100,200,300,400,500];
+
+let state = { used: [], teams: [{name:"Team 1",score:0},{name:"Team 2",score:0},{name:"Team 3",score:0}] };
+try { const s = JSON.parse(localStorage.getItem("jeopardyAlg1")); if (s && s.teams) state = s; } catch(e) {}
+const save = () => { try { localStorage.setItem("jeopardyAlg1", JSON.stringify(state)); } catch(e) {} };
+
+const $ = id => document.getElementById(id);
+let current = null;
+
+function renderBoard(){
+  const b = $("board"); b.innerHTML = "";
+  CATEGORIES.forEach(c => { const d = document.createElement("div"); d.className="cat"; d.textContent=c.name; b.appendChild(d); });
+  VALUES.forEach((v,r) => CATEGORIES.forEach((c,ci) => {
+    const t = document.createElement("button"); t.className="tile"; t.textContent=v;
+    const key = ci+"-"+r; t.disabled = state.used.includes(key);
+    t.onclick = () => openClue(ci,r); b.appendChild(t);
+  }));
+}
+
+function renderTeams(){
+  const w = $("teams"); w.innerHTML = "";
+  state.teams.forEach((t,i) => {
+    const d = document.createElement("div"); d.className="team";
+    d.innerHTML = `<div class="name" contenteditable="true" spellcheck="false"></div>
+      <div class="score ${t.score<0?'neg':''}">${t.score}</div>
+      <div class="adj"><button class="ghost" data-d="-100">−100</button><button class="ghost" data-d="100">+100</button></div>`;
+    const n = d.querySelector(".name"); n.textContent = t.name;
+    n.addEventListener("input", () => { t.name = n.textContent.trim() || `Team ${i+1}`; save(); });
+    n.addEventListener("keydown", e => { if (e.key==="Enter"){ e.preventDefault(); n.blur(); }});
+    d.querySelectorAll(".adj button").forEach(btn => btn.onclick = () => { t.score += +btn.dataset.d; save(); renderTeams(); });
+    w.appendChild(d);
+  });
+}
+
+function openClue(ci,r){
+  current = {ci,r};
+  const c = CATEGORIES[ci], clue = c.clues[r], v = VALUES[r];
+  $("qMeta").textContent = `${c.name} — ${v}`;
+  $("qText").innerHTML = clue.q;
+  $("aText").innerHTML = clue.a + (clue.why ? `<span class="why">${clue.why}</span>` : "");
+  $("qCard").classList.remove("show-a");
+  $("revealRow").style.display = "flex";
+  const ab = $("awardBtns"); ab.innerHTML = "";
+  state.teams.forEach((t,i) => {
+    const g = document.createElement("div"); g.className="grp";
+    g.innerHTML = `<span></span><button class="award">+${v}</button><button class="deduct">−${v}</button>`;
+    g.querySelector("span").textContent = t.name;
+    const [plus, minus] = g.querySelectorAll("button");
+    plus.onclick = () => { t.score += v; plus.disabled = true; plus.style.opacity=.4; save(); renderTeams(); };
+    minus.onclick = () => { t.score -= v; minus.disabled = true; minus.style.opacity=.4; save(); renderTeams(); };
+    ab.appendChild(g);
+  });
+  $("qOverlay").classList.add("open");
+}
+
+function closeClue(){
+  if (current){ const k = current.ci+"-"+current.r; if(!state.used.includes(k)) state.used.push(k); save(); }
+  current = null; $("qOverlay").classList.remove("open"); renderBoard();
+}
+
+$("revealBtn").onclick = () => { $("qCard").classList.add("show-a"); $("revealRow").style.display="none"; };
+$("doneBtn").onclick = closeClue;
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape"){
+    if ($("keyOverlay").classList.contains("open")) $("keyOverlay").classList.remove("open");
+    else if ($("qOverlay").classList.contains("open")) closeClue();
+  }
+  if (e.key === " " && $("qOverlay").classList.contains("open") && !$("qCard").classList.contains("show-a")){ e.preventDefault(); $("revealBtn").click(); }
+});
+
+$("teamPlus").onclick = () => { if (state.teams.length<6){ state.teams.push({name:`Team ${state.teams.length+1}`,score:0}); save(); renderTeams(); } };
+$("teamMinus").onclick = () => { if (state.teams.length>1){ state.teams.pop(); save(); renderTeams(); } };
+
+$("resetBtn").onclick = () => { $("resetConfirm").classList.add("open"); $("resetBtn").style.display="none"; };
+$("resetNo").onclick = () => { $("resetConfirm").classList.remove("open"); $("resetBtn").style.display=""; };
+$("resetYes").onclick = () => {
+  state.used = []; state.teams.forEach(t => t.score = 0); save(); renderBoard(); renderTeams(); $("resetNo").click();
+};
+
+$("keyBtn").onclick = () => {
+  $("keyBody").innerHTML = CATEGORIES.map(c => `<h2>${c.name}</h2><table>${
+    c.clues.map((cl,i) => `<tr><td>${VALUES[i]}</td><td>${cl.q}</td><td>${cl.a}</td></tr>`).join("")}</table>`).join("");
+  $("keyOverlay").classList.add("open");
+};
+$("keyClose").onclick = () => $("keyOverlay").classList.remove("open");
+
+renderBoard(); renderTeams();
+</script>
+</body>
+</html>

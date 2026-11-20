@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Math Check-In · Niche Classroom Apps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:wght@600..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="../">Niche Classroom <span>Apps</span></a>
+    <nav aria-label="Sections"><a href="../#apps">All apps</a></nav>
+  </div>
+</header>
+<main class="page">
+  <div class="wrap">
+    <a class="crumb" href="../#apps">← All apps</a>
+    <div class="head">
+      <p class="kicker">Assessment</p>
+      <h1>Math Check-In</h1>
+      <p>Students answer one multiple-choice question per page, then say how sure they feel. The wrong answers are built from common misconceptions, so a wrong choice tells you what kind of mistake was made. Your Google Sheet sorts every response into <b>Solid</b> (right and sure), <b>Shaky</b> (right but unsure), <b>Misconception</b> (wrong but sure) or <b>Gap</b> (wrong and unsure).</p>
+    </div>
+
+    <div class="versions">
+      <article class="app">
+        <p class="tag">25 questions</p>
+        <h3>3rd Grade Skills</h3>
+        <p class="desc">Grade 3 math: multiplication and division, fractions, area and perimeter, patterns and word problems.</p>
+        <div class="spacer"></div>
+        <div class="btns">
+          <a class="btn ghost" href="grade-3/preview.html">Try the preview</a>
+          <a class="btn copy" href="REPLACE-WITH-GRADE-3-COPY-LINK">Get your own copy</a>
+        </div>
+      </article>
+      <article class="app">
+        <p class="tag">75 questions</p>
+        <h3>Grades 4–7</h3>
+        <p class="desc">4th through 6th grade content plus a bridge into basic algebra. Built for advanced and grade-skipped students who may have gaps.</p>
+        <div class="spacer"></div>
+        <div class="btns">
+          <a class="btn ghost" href="grades-4-7/preview.html">Try the preview</a>
+          <a class="btn copy" href="REPLACE-WITH-GRADES-4-7-COPY-LINK">Get your own copy</a>
+        </div>
+      </article>
+    </div>
+
+    <h2>Setting up your own copy</h2>
+    <p style="margin:10px 0 22px;color:var(--muted);max-width:820px">The preview doesn't save answers. The real version runs from a Google Sheet that only you can see, so students never need a new account. Setup takes about 15 minutes, one time.</p>
+    <ol class="how">
+      <li><b>Make a copy.</b> Click "Get your own copy" above while signed in to your school Google account. Google makes a private copy of the Sheet in your Drive, with the app built in.</li>
+      <li><b>Run setup once.</b> In the Sheet, open <b>Extensions → Apps Script</b>. Choose <code>setup</code> from the function menu and click <b>Run</b>. Approve the permissions Google asks for. This creates the results tabs.</li>
+      <li><b>Deploy the student link.</b> In Apps Script, click <b>Deploy → New deployment</b>, choose <b>Web app</b>, set "Execute as" to <b>Me</b>, and choose who has access (your district's setting may be "Anyone in your organization"). Click <b>Deploy</b> and copy the web app link.</li>
+      <li><b>Share the link with students.</b> Post it in your learning management system. Students type their first and last name to start, and can pick up where they left off by typing it the same way.</li>
+    </ol>
+    <div class="note"><b>Running setup and deploying are separate steps.</b> Setup builds the Sheet's tabs. Deploying makes the link students use. If students see an error, check that you deployed as a <b>Web app</b>.</div>
+  </div>
+</main>
+<footer>
+  <div class="wrap">
+    <p><b>Niche Classroom Apps</b> · Free to use in your classroom. Please check every question and answer key before students see them.</p>
+  </div>
+</footer>
+<script>
+// Until a real "make a copy" link is added, show the button as coming soon instead of a broken link.
+document.querySelectorAll('a.copy').forEach(a=>{
+  if(a.getAttribute('href').startsWith('REPLACE')){a.setAttribute('aria-disabled','true');a.removeAttribute('href');a.textContent='Copy link coming soon'}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="+30">
+<meta name="theme-color" content="#1a1a2e">
+<title>+30</title>
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1a2e;--ink:#f7f3e8;--btn:#ffcc00;--btn-ink:#1a1a2e;--accent:#ff4f79}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(circle at 50% 35%,#2b2b52 0%,var(--bg) 70%);color:var(--ink);
+  font:16px/1.4 Rubik,system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:28px;padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overflow:hidden}
+#go{width:min(64vw,300px);aspect-ratio:1;border-radius:50%;border:0;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,#ffe066,var(--btn) 55%,#e0a800);
+  color:var(--btn-ink);font:800 clamp(64px,20vw,110px)/1 Rubik,system-ui,sans-serif;letter-spacing:-.03em;
+  box-shadow:0 14px 0 #b38600,0 22px 40px rgba(0,0,0,.45);transition:transform .08s,box-shadow .08s;position:relative}
+#go:active{transform:translateY(10px);box-shadow:0 4px 0 #b38600,0 10px 20px rgba(0,0,0,.4)}
+#go:disabled{filter:grayscale(.7) brightness(.8)}
+#go:focus-visible{outline:4px solid var(--accent);outline-offset:8px}
+#ring{position:absolute;inset:-14px;width:calc(100% + 28px);height:calc(100% + 28px);pointer-events:none;transform:rotate(-90deg)}
+#ring circle{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+#badge{position:absolute;top:4%;right:4%;min-width:44px;height:44px;padding:0 10px;border-radius:22px;
+  background:var(--accent);color:#fff;font:800 20px/44px Rubik,sans-serif;display:none}
+#now{min-height:96px;display:flex;align-items:center;gap:14px;max-width:420px;width:100%}
+#art{width:72px;height:72px;border-radius:10px;flex:none;background:#2b2b52;object-fit:cover;visibility:hidden}
+#meta{min-width:0}
+#title{font-weight:800;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#album{opacity:.75;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#link{font-size:13px;color:#ffe066;display:none}
+#msg{opacity:.75;font-size:15px;text-align:center}
+#home{position:fixed;top:calc(env(safe-area-inset-top) + 12px);left:16px;color:var(--ink);opacity:.6;font-size:14px;text-decoration:none}
+#home:hover{opacity:1}
+@media (display-mode:standalone){#home{display:none}}
+@media (prefers-reduced-motion:reduce){#go,#ring circle{transition:none}}
+</style>
+</head>
+<body>
+<a id="home" href="../">← All apps</a>
+<button id="go" aria-label="Play 30 seconds of a random They Might Be Giants kids song" disabled>
+  <svg id="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" stroke-dasharray="289" stroke-dashoffset="289"/></svg>
+  +30<span id="badge"></span>
+</button>
+<div id="now">
+  <img id="art" alt="">
+  <div id="meta">
+    <div id="title"></div>
+    <div id="album"></div>
+    <a id="link" target="_blank" rel="noopener">Hear the whole song on Apple Music</a>
+  </div>
+</div>
+<div id="msg">Loading songs…</div>
+<audio id="player" preload="auto" playsinline></audio>
+<script>
+/* Song list from They Might Be Giants' kids albums, built in so the phone never has to search Apple. */
+const ALBUMS=[["Here Come the 123s", 1443520419, "is1-ssl.mzstatic.com/image/thumb/Music128/v4/fa/27/c2/fa27c210-0289-4eb1-cb83-625b8e1f575c/00050087111649.rgb.jpg"], ["Here Comes Science", 1440661953, "is1-ssl.mzstatic.com/image/thumb/Music118/v4/d7/9b/eb/d79beb40-291f-1070-3d07-7a2bce0680d1/00050087153540.rgb.jpg"], ["Here Come the ABCs", 1445745394, "is1-ssl.mzstatic.com/image/thumb/Music118/v4/71/8b/67/718b673d-6b99-cb04-24d9-436e2aec44aa/00050086120475.rgb.jpg"], ["No!", 632985017, "is1-ssl.mzstatic.com/image/thumb/Music/v4/88/ff/47/88ff479e-923a-795f-d574-ee20c1376f66/886443927001.jpg"], ["Why?", 1047372559, "is1-ssl.mzstatic.com/image/thumb/Music6/v4/6d/d9/19/6dd919d7-8401-9cf1-881f-33fec4dd27b5/886445534757.jpg"]];
+const SONGS=[["Here Come the 123's", 0, "221/v4/d3/69/47/d36947d3-e872-db2a-7ddb-0d8b966a9364/mzaf_10290911981341047424.plus.aac.p.m4a", 1443520551], ["Zeroes", 0, "211/v4/fe/9c/6d/fe9c6df1-801f-398e-5725-7a386f588c31/mzaf_16433038099328218694.plus.aac.p.m4a", 1443520565], ["One Everything", 0, "221/v4/3d/dd/c5/3dddc599-cb98-e40e-5253-4494abcffeda/mzaf_7158081902381522654.plus.aac.p.m4a", 1443520855], ["Number Two", 0, "221/v4/3f/1e/09/3f1e09a4-d181-c992-48f0-2d08d8cc4780/mzaf_8116241548220478718.plus.aac.p.m4a", 1443520869], ["Triops Has Three Eyes", 0, "221/v4/72/a9/9c/72a99c5c-4583-46f7-38c5-049a5bbc4a1e/mzaf_3091606715057142733.plus.aac.p.m4a", 1443520937], ["Apartment Four", 0, "211/v4/34/c2/27/34c227d3-0078-403d-34eb-ba211e7a6a4b/mzaf_14009852946498190687.plus.aac.p.m4a", 1443520949], ["High Five!", 0, "221/v4/9f/7a/80/9f7a802d-61b1-c78c-f40e-a250a1142520/mzaf_6401458394469537317.plus.aac.p.m4a", 1443520955], ["The Secret Life of Six", 0, "211/v4/13/58/ad/1358ad6d-e236-d7c4-3116-530c5439a13d/mzaf_16668039785975091894.plus.aac.p.m4a", 1443521142], ["Seven", 0, "221/v4/ba/cc/e0/bacce006-97f0-3681-88fe-244731aafe1f/mzaf_10393185027904641663.plus.aac.p.m4a", 1443521147], ["Seven Days of the Week (I Never Go to Work)", 0, "221/v4/38/81/c7/3881c79d-52e4-17b5-9f71-d0f70f22c14d/mzaf_2981888303400917126.plus.aac.p.m4a", 1443521154], ["Figure Eight", 0, "211/v4/95/0e/b9/950eb903-8f2d-ee6a-42f4-36fad97578d9/mzaf_1499636889892887006.plus.aac.p.m4a", 1443521161], ["Pirate Girls Nine", 0, "221/v4/93/5a/a4/935aa451-918b-6316-e562-3c0eec70508e/mzaf_5194424496397088464.plus.aac.p.m4a", 1443521413], ["Nine Bowls of Soup", 0, "211/v4/ac/93/c1/ac93c1df-da8f-32b2-6901-de713a191312/mzaf_14734118103148526392.plus.aac.p.m4a", 1443521426], ["Ten Mississippi", 0, "221/v4/63/ea/82/63ea8273-a994-872d-48f5-1397cfa91494/mzaf_4824018630803427576.plus.aac.p.m4a", 1443521561], ["One Dozen Monkeys", 0, "211/v4/d3/21/93/d3219391-5099-5fa8-80af-8521f52c5d43/mzaf_11539920935182713131.plus.aac.p.m4a", 1443521573], ["Eight Hundred and Thirteen Mile Car Trip", 0, "221/v4/7a/0f/89/7a0f89d9-6e06-5d99-b95d-3f63e609ddac/mzaf_15485355135161263327.plus.aac.p.m4a", 1443521582], ["Infinity", 0, "221/v4/e6/45/79/e6457995-216a-8704-f028-c57909341554/mzaf_2854115467905324592.plus.aac.p.m4a", 1443521712], ["I Can Add", 0, "211/v4/4a/9c/c8/4a9cc8d8-bf15-adb1-ae63-65b1dce4144a/mzaf_14631692639796893438.plus.aac.p.m4a", 1443521714], ["Nonagon", 0, "211/v4/b3/f5/9c/b3f59cb6-13e1-57cc-a93a-f5042f3870e5/mzaf_2584943075581385484.plus.aac.p.m4a", 1443521718], ["Even Numbers", 0, "221/v4/aa/d5/a8/aad5a8e7-9a7a-46a3-3f64-58abb09a5635/mzaf_15660411379792271950.plus.aac.p.m4a", 1443521722], ["Ooh La! Ooh La!", 0, "221/v4/a7/19/bf/a719bff6-d320-f371-a438-f583342ac3e2/mzaf_4542873503431694669.plus.aac.p.m4a", 1443521896], ["Heart of the Band", 0, "221/v4/c7/1e/d5/c71ed567-ccda-090b-52b4-35c763d7ed69/mzaf_12724604402583751568.plus.aac.p.m4a", 1443521902], ["Hot Dog!", 0, "211/v4/1c/74/50/1c7450ec-bbba-b39e-d0e6-2d675c95a827/mzaf_14479011142019716248.plus.aac.p.m4a", 1443521910], ["Mickey Mouse Clubhouse Theme", 0, "221/v4/23/66/91/23669144-9ffb-3cfd-1471-a41f85edb6cf/mzaf_3440662959112558227.plus.aac.p.m4a", 1443521914], ["Science Is Real", 1, "211/v4/9a/9e/a1/9a9ea12d-47bc-d0f9-9ca0-0c3642a9a54c/mzaf_3953641565307153416.plus.aac.p.m4a", 1440661956], ["Meet the Elements", 1, "211/v4/f6/f0/a9/f6f0a936-6baa-5cc1-d926-c4faf5a0559a/mzaf_30555688643547389.plus.aac.p.m4a", 1440661959], ["I Am a Paleontologist", 1, "211/v4/ad/f3/5d/adf35dca-124c-847d-57c9-f648081c137c/mzaf_8087532567337485190.plus.aac.p.m4a", 1440662271], ["The Bloodmobile", 1, "221/v4/73/37/93/733793b3-9aa2-a51b-c549-c44657bc7808/mzaf_5782840618389708891.plus.aac.p.m4a", 1440662272], ["Electric Car", 1, "211/v4/bd/3f/f2/bd3ff240-d145-2aef-4fa4-a60c70be3336/mzaf_12557518940915255268.plus.aac.p.m4a", 1440662273], ["My Brother the Ape", 1, "211/v4/1f/40/c8/1f40c84c-39cc-6785-1486-7825a1a1c1bf/mzaf_538270901806084298.plus.aac.p.m4a", 1440662277], ["What Is a Shooting Star?", 1, "221/v4/50/71/46/50714688-bc47-504f-8389-d1f150ab2bac/mzaf_10535935873558687193.plus.aac.p.m4a", 1440662477], ["How Many Planets?", 1, "211/v4/25/bd/b1/25bdb133-101a-3ee4-f27c-dec2d85b862a/mzaf_11618034594987311947.plus.aac.p.m4a", 1440662478], ["Why Does the Sun Shine?", 1, "221/v4/cd/cd/f7/cdcdf7c3-4ccc-ef28-82a2-f36a14919114/mzaf_3324400521194965771.plus.aac.p.m4a", 1440662490], ["Why Does the Sun Really Shine?", 1, "211/v4/e8/9a/2d/e89a2d06-4ad1-5c73-4a27-bcb9f3df0aad/mzaf_14068514102518770904.plus.aac.p.m4a", 1440662494], ["Roy G. Biv", 1, "211/v4/43/7f/4e/437f4e52-756d-6b8c-c638-7cdca9ecb3ef/mzaf_17359629763225426997.plus.aac.p.m4a", 1440662500], ["Put It to the Test", 1, "221/v4/d7/4d/a0/d74da003-7a37-2307-52ce-5a84df93f9a0/mzaf_1203420563379140051.plus.aac.p.m4a", 1440662741], ["Photosynthesis", 1, "221/v4/80/e8/ac/80e8ac99-4567-a412-4f8f-ea8e8162fc05/mzaf_4488852283974238753.plus.aac.p.m4a", 1440662742], ["Cells", 1, "221/v4/f2/e8/5a/f2e85af8-4d62-7911-23a5-85a85580f87c/mzaf_7029376813131740152.plus.aac.p.m4a", 1440662744], ["Speed and Velocity", 1, "221/v4/95/31/34/953134f1-9526-d658-b627-fc4f5f23275d/mzaf_16685951293258213265.plus.aac.p.m4a", 1440662746], ["Computer Assisted Design", 1, "211/v4/26/9a/b4/269ab403-fa8b-d63d-42cb-78a4959c7588/mzaf_8359301071373275367.plus.aac.p.m4a", 1440662747], ["Solid Liquid Gas", 1, "211/v4/39/b1/8d/39b18dab-e3c8-489c-e06b-e7f100f59621/mzaf_17670760481705717609.plus.aac.p.m4a", 1440662749], ["Here Comes Science", 1, "221/v4/a8/28/14/a828147a-ce81-58cf-13d1-5457f6fee8f6/mzaf_4939374188232563378.plus.aac.p.m4a", 1440662750], ["The Ballad of Davy Crockett (in Outer Space)", 1, "221/v4/a1/87/4d/a1874d0c-1854-1bbe-b1a4-81a87feb6040/mzaf_11565076086417441661.plus.aac.p.m4a", 1440662753], ["Here Come the ABCs", 2, "211/v4/72/db/63/72db6344-c0b3-9808-362e-cf6ce8d4a576/mzaf_4265638269998419460.plus.aac.p.m4a", 1445745602], ["Alphabet of Nations", 2, "211/v4/e9/0f/ca/e90fcaa5-aa8d-1434-7514-3e177e018df2/mzaf_12710978987015551633.plus.aac.p.m4a", 1445745604], ["E Eats Everything", 2, "211/v4/3e/8a/ee/3e8aeed9-97df-6853-f63e-6998e13f6cf7/mzaf_16480916194386009290.plus.aac.p.m4a", 1445745609], ["Flying V", 2, "211/v4/01/4b/f1/014bf122-7449-2fdc-a7b1-a92c34dc6dc0/mzaf_2865335193279847695.plus.aac.p.m4a", 1445745825], ["Q U", 2, "221/v4/27/bc/aa/27bcaa4e-ce8a-fa3b-46fd-26899b98b5ef/mzaf_17017705887303644908.plus.aac.p.m4a", 1445745827], ["Go for G!", 2, "221/v4/2c/7d/84/2c7d84e8-a8a0-7908-31e2-e1240bfe8ffb/mzaf_6294082476119612675.plus.aac.p.m4a", 1445745829], ["Pictures of Pandas Painting", 2, "211/v4/26/35/dd/2635dd80-1da2-e2a2-80a9-901074b3bded/mzaf_4552183665191652440.plus.aac.p.m4a", 1445745847], ["D & W", 2, "211/v4/41/2b/8e/412b8e38-acba-a630-bf85-59c5e9814623/mzaf_15879327219068174639.plus.aac.p.m4a", 1445746099], ["Fake-Believe", 2, "221/v4/21/6e/1d/216e1dd8-1ba3-1ef0-c00e-b765a6c33293/mzaf_15139479634885557818.plus.aac.p.m4a", 1445746109], ["Can You Find It?", 2, "221/v4/a6/9b/5d/a69b5d46-cfc0-f434-e91e-516fc82a34b7/mzaf_12030625354393401649.plus.aac.p.m4a", 1445746115], ["The Vowel Family", 2, "221/v4/76/05/25/760525c4-f8b9-d317-eebe-112a6c158e29/mzaf_12733282947604611753.plus.aac.p.m4a", 1445746333], ["Letter / Not a Letter", 2, "221/v4/d8/3a/a5/d83aa574-0515-e032-f91f-128a54fa023d/mzaf_8152935765973188114.plus.aac.p.m4a", 1445746343], ["Alphabet Lost and Found", 2, "211/v4/83/51/19/83511955-5133-8888-2528-b6e6a13a3afa/mzaf_29932103070927719.plus.aac.p.m4a", 1445746352], ["I C U", 2, "221/v4/9f/56/45/9f56455c-4c37-e4a0-0481-bbe59dfabe01/mzaf_16829673458188103409.plus.aac.p.m4a", 1445746452], ["Letter Shapes", 2, "221/v4/50/2a/fc/502afcd0-14cc-a977-13d0-9b19539064ff/mzaf_295020139298728781.plus.aac.p.m4a", 1445746456], ["Who Put the Alphabet In Alphabetical Order?", 2, "221/v4/7a/a8/12/7aa8126d-daa1-c553-3cef-fb0967c54231/mzaf_8398335417428912662.plus.aac.p.m4a", 1445746465], ["Rolling O", 2, "221/v4/00/a3/6b/00a36b79-4e35-6df5-8ef8-a62c4451fc87/mzaf_8075139324012764849.plus.aac.p.m4a", 1445746470], ["L M N O", 2, "211/v4/83/a9/74/83a9748a-e426-46d0-673b-9e7be93280a9/mzaf_14647084111017303207.plus.aac.p.m4a", 1445746477], ["C Is for Conifers", 2, "221/v4/3a/a4/4c/3aa44cd1-5b5f-9ec1-a243-842d9a2a0e8c/mzaf_5710932588350008461.plus.aac.p.m4a", 1445746663], ["D Is for Drums", 2, "211/v4/b8/76/c5/b876c516-9109-35e4-ea3b-f5ca46b042c9/mzaf_3406757937856086809.plus.aac.p.m4a", 1445746681], ["Z Y X", 2, "211/v4/83/4a/58/834a58ab-1944-3488-d4bc-68ecf5884cfb/mzaf_3884953724839500823.plus.aac.p.m4a", 1445746761], ["Goodnight My Friends", 2, "211/v4/22/76/f8/2276f80d-7dd2-d139-35fd-7120974ee4e5/mzaf_18031694328755631789.plus.aac.p.m4a", 1445746768], ["Clap Your Hands", 2, "211/v4/14/c5/fd/14c5fda8-2f37-92a5-a13c-a67aa94c352f/mzaf_9367394371862105723.plus.aac.p.m4a", 1445746901], ["Here In Higglytown (Theme to Playhouse Disney's Higglytown Heroes)", 2, "211/v4/75/fd/da/75fdda00-e755-451b-f751-2ca723ce698a/mzaf_17613023259307172159.plus.aac.p.m4a", 1445746911], ["Fibber Island", 3, "125/v4/f2/fb/b7/f2fbb7a9-0a86-c62d-1472-7f2e4972d866/mzaf_3515387079651751205.plus.aac.p.m4a", 632985022], ["Four of Two", 3, "125/v4/4a/5b/7d/4a5b7df4-dc17-debf-651f-5b2fe255d9a8/mzaf_7229503418860783763.plus.aac.p.m4a", 632985023], ["Robot Parade", 3, "115/v4/f5/2b/8b/f52b8bac-3fa2-e7d0-3c0d-b5859c9ece32/mzaf_15340090967213349279.plus.aac.p.m4a", 632985024], ["No!", 3, "125/v4/1b/f9/37/1bf9374a-55cc-98f5-e644-40d6b6626722/mzaf_9031898135067921179.plus.aac.p.m4a", 632985025], ["Where Do They Make Balloons?", 3, "125/v4/71/3f/93/713f93e0-70c7-b8b6-2cd1-729452955f9c/mzaf_18022989145481021937.plus.aac.p.m4a", 632985027], ["In the Middle, In the Middle, In the Middle", 3, "115/v4/55/3a/6b/553a6b2a-b6c3-3f46-7721-4468e60c5897/mzaf_7646542781433732734.plus.aac.p.m4a", 632985028], ["Violin", 3, "125/v4/ef/55/0f/ef550fa9-628e-64f9-f4f4-e37beca964aa/mzaf_10744823489519731416.plus.aac.p.m4a", 632985829], ["John Lee Supertaster", 3, "125/v4/86/ec/4e/86ec4ead-d51a-9811-3e05-9017a9ec3d46/mzaf_298751890644346326.plus.aac.p.m4a", 632985830], ["The Edison Museum", 3, "115/v4/f5/5c/7d/f55c7df8-5c9f-28d3-10e6-b0aac14bcee9/mzaf_9302234372232677934.plus.aac.p.m4a", 632985831], ["The House at the Top of the Tree", 3, "125/v4/58/73/47/58734749-31b4-568a-d765-8da9ebc9dca9/mzaf_11803029968239082618.plus.aac.p.m4a", 632985832], ["I Am Not Your Broom", 3, "125/v4/a6/59/6d/a6596d0c-5cbb-54e3-41d8-36784a36008a/mzaf_18231783541245256973.plus.aac.p.m4a", 632985834], ["Wake up Call", 3, "125/v4/08/81/79/0881792e-45fe-fbb8-941a-93c2d7873278/mzaf_14445887472585832623.plus.aac.p.m4a", 632985837], ["I Am a Grocery Bag", 3, "115/v4/20/b5/86/20b5860b-3874-4c04-3b55-2eb425596fda/mzaf_15464935219941916376.plus.aac.p.m4a", 632985838], ["Lazyhead and Sleepbones", 3, "125/v4/11/e4/b0/11e4b06a-eac5-90bb-2015-2f611a8c0528/mzaf_1767294572229716220.plus.aac.p.m4a", 632985839], ["Bed Bed Bed", 3, "116/v4/c3/80/01/c380018d-5dec-a2cf-276d-45212754c7f0/mzaf_12209631368771423232.plus.aac.p.m4a", 632985840], ["Sleepwalkers", 3, "125/v4/05/f4/7d/05f47dc1-7f0e-7f47-5f3b-adc1d6297638/mzaf_11202473294379904726.plus.aac.p.m4a", 632985841], ["Oh You Did (feat. Robin Goldwasser)", 4, "125/v4/01/c5/dd/01c5ddb2-57f4-5123-3f5f-90351763ead8/mzaf_17728621651443992110.plus.aac.p.m4a", 1047372560], ["Omnicorn", 4, "115/v4/4d/c7/c3/4dc7c382-8934-ee46-df2a-75969484b008/mzaf_14688950319174137988.plus.aac.p.m4a", 1047372561], ["I Am Invisible", 4, "125/v4/7a/23/1f/7a231fa0-5d5e-a82a-404c-34cac1be94e8/mzaf_2078406427294329805.plus.aac.p.m4a", 1047372562], ["Definition of Good", 4, "115/v4/c4/20/fd/c420fd4b-5b3c-30a8-d30d-11587af6a2ee/mzaf_3040545659261706737.plus.aac.p.m4a", 1047372565], ["And Mom and Kid", 4, "125/v4/6d/08/d4/6d08d402-889f-2e00-de38-b419324cf68c/mzaf_18170902265728145604.plus.aac.p.m4a", 1047372566], ["I Made a Mess", 4, "125/v4/31/f1/f1/31f1f1a4-e6b3-39d0-9726-8c146608ca00/mzaf_6033978921498913569.plus.aac.p.m4a", 1047372567], ["Moles, Hounds, Bears, Bees and Hares", 4, "115/v4/32/0a/61/320a6120-19a8-1713-b97c-8d8c0ccc1fb0/mzaf_4328396028617790871.plus.aac.p.m4a", 1047372569], ["Walking My Cat Named Dog", 4, "115/v4/c4/81/5a/c4815a4b-ba49-6e63-9421-192f55b72536/mzaf_5193116365533859463.plus.aac.p.m4a", 1047372570], ["Or So I Have Read", 4, "115/v4/c5/17/89/c517897a-5286-50b9-6dc9-77d026fa5fde/mzaf_9649583812885351864.plus.aac.p.m4a", 1047373125], ["Elephants (feat. Danny Weinkauf)", 4, "115/v4/d7/b0/4e/d7b04e05-2c93-43d0-63f1-a9380e76628f/mzaf_16057611447599189903.plus.aac.p.m4a", 1047373126], ["Long White Beard (feat. Robin Goldwasser)", 4, "125/v4/44/30/8d/44308db9-9f96-ea23-c175-54e98df14e80/mzaf_3633048051181599007.plus.aac.p.m4a", 1047373127], ["I Just Want to Dance", 4, "115/v4/00/72/e0/0072e041-2681-b0df-68a0-66f12f56d058/mzaf_6010055080493960711.plus.aac.p.m4a", 1047373128], ["Thinking Machine", 4, "125/v4/dc/70/2e/dc702e13-7245-ede6-2323-53308bed7e02/mzaf_1941104929183779971.plus.aac.p.m4a", 1047373129], ["So Crazy for Books", 4, "115/v4/df/5f/3c/df5f3c9e-7a56-0093-c6c9-137549b2a18b/mzaf_8665405239979226874.plus.aac.p.m4a", 1047373130], ["I Haven't Seen You in Forever", 4, "125/v4/20/53/31/20533118-7aba-5342-cff2-35bd449b5ff2/mzaf_15000503188682534892.plus.aac.p.m4a", 1047373131], ["Out of a Tree", 4, "125/v4/1d/81/0f/1d810f37-236f-31ab-89df-73ca563a4f31/mzaf_13746978387315978319.plus.aac.p.m4a", 1047373132], ["Hello Mrs. Wheelyke", 4, "125/v4/f4/e6/6d/f4e66db6-90d3-8d58-af91-859790b183c8/mzaf_2218328434664755505.plus.aac.p.m4a", 1047373133], ["Then the Kids Took Over", 4, "125/v4/dc/23/e7/dc23e705-6cf8-1e5c-7232-3d36a49e01ee/mzaf_378228142305931521.plus.aac.p.m4a", 1047373134]];
+{
+const go=document.getElementById('go'), badge=document.getElementById('badge'), msg=document.getElementById('msg');
+const art=document.getElementById('art'), title=document.getElementById('title'), album=document.getElementById('album'), link=document.getElementById('link');
+const ring=document.querySelector('#ring circle'), player=document.getElementById('player');
+const CIRC=289;
+let songs=[], queue=0, bag=[], errs=0;
+
+function load(){
+  const P='https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview';
+  songs=SONGS.map(([name,a,p,id])=>{const al=ALBUMS[a];return{
+    trackName:name, collectionName:al[0],
+    previewUrl:p[0]==='!'?p.slice(1):P+p,
+    artworkUrl:'https://'+al[2]+'/300x300bb.jpg',
+    trackViewUrl:'https://music.apple.com/us/album/'+al[1]+'?i='+id}});
+  go.disabled=false; msg.textContent=songs.length+' songs ready. Tap +30.';
+}
+// Shuffle-bag: no repeats until every song has played once
+function pick(){
+  if(!bag.length){bag=songs.slice();for(let i=bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]]}}
+  return bag.pop();
+}
+function playNext(){
+  const t=pick();
+  player.src=t.previewUrl;
+  title.textContent=t.trackName;
+  album.textContent=t.collectionName;
+  art.src=t.artworkUrl;art.style.visibility='visible';
+  link.href=t.trackViewUrl;link.style.display='inline';
+  const p=player.play();
+  if(p&&p.catch)p.catch(()=>{msg.textContent='Tap +30 again to start sound.';});
+  msg.textContent='';
+}
+function updateBadge(){badge.style.display=queue?'block':'none';badge.textContent='+'+queue}
+go.addEventListener('click',()=>{
+  if(!songs.length)return;
+  if(player.paused||player.ended){playNext()}
+  else{queue++;updateBadge();msg.textContent=queue===1?'1 more song queued':queue+' more songs queued'}
+});
+player.addEventListener('ended',()=>{
+  ring.style.strokeDashoffset=CIRC;
+  if(queue>0){queue--;updateBadge();playNext()}
+  else msg.textContent='Tap +30 for another.';
+});
+player.addEventListener('timeupdate',()=>{
+  const d=player.duration||30;ring.style.strokeDashoffset=CIRC*(1-Math.min(player.currentTime/d,1));
+});
+player.addEventListener('playing',()=>{errs=0});
+player.addEventListener('error',()=>{ if(++errs>3){msg.textContent='Having trouble playing songs. Check your connection.';return} playNext(); });
+load();
+}
+</script>
+</body>
+</html>

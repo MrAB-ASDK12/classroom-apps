@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Math Check-In: 3rd Grade Skills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f3ec; --card:#ffffff; --ink:#1d2733; --muted:#5d6876; --line:#dcd6ca;
+    --accent:#0e6b62; --accent-ink:#ffffff; --accent-soft:#e3f1ee; --tint:#eef5f3;
+    --warn:#9a3412; --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:19px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  main{max-width:760px;margin:0 auto;padding:20px 18px 48px}
+  .demo{background:#fff4d6;border:1px solid #ecd9a0;color:#6b4e00;border-radius:10px;
+    padding:8px 12px;font-size:15px;margin-bottom:14px}
+  header.bar{display:flex;align-items:center;gap:14px;margin:4px 0 16px}
+  .count{font-weight:700;font-size:16px;color:var(--muted);white-space:nowrap}
+  .track{flex:1;height:10px;background:#e7e1d6;border-radius:99px;overflow:hidden}
+  .fill{height:100%;background:var(--accent);border-radius:99px;transition:width .35s ease}
+  .linkbtn{background:none;border:none;color:var(--muted);font:inherit;font-size:15px;
+    text-decoration:underline;cursor:pointer;padding:4px;white-space:nowrap}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px 24px;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+  h1{font-size:30px;line-height:1.15;margin:0 0 10px}
+  h2{font-size:21px;margin:0 0 6px}
+  p{margin:0 0 12px}
+  .prompt{font-size:24px;line-height:1.4;margin:0 0 16px}
+  .figure{display:flex;justify-content:center;margin:4px 0 16px;color:var(--ink)}
+  .figure svg{max-width:100%;height:auto}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+  @media (max-width:560px){.opts{grid-template-columns:1fr}}
+  .opt{display:flex;align-items:center;gap:14px;text-align:left;background:#fff;
+    border:2px solid var(--line);border-radius:14px;padding:14px 16px;font:inherit;
+    font-size:21px;color:var(--ink);cursor:pointer;min-height:64px;transition:border-color .12s,background .12s}
+  .opt:hover{border-color:#a9b8b4}
+  .opt .ltr{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+    background:var(--tint);font-weight:700;font-size:17px;color:var(--accent)}
+  .opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+  .opt[aria-pressed="true"] .ltr{background:var(--accent);color:var(--accent-ink)}
+  .comfort{border-top:1px dashed var(--line);padding-top:18px}
+  .comfort h2{font-size:18px;color:var(--muted);font-weight:700}
+  .scale{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+  @media (max-width:560px){.scale{grid-template-columns:1fr 1fr}}
+  .lk{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 8px;
+    font:inherit;font-size:15px;line-height:1.25;color:var(--ink);cursor:pointer;display:flex;
+    flex-direction:column;align-items:center;gap:4px;min-height:92px;justify-content:center}
+  .lk .em{font-size:28px;line-height:1}
+  .lk[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+  .actions{display:flex;justify-content:flex-end;align-items:center;gap:14px;margin-top:22px}
+  .hint{color:var(--muted);font-size:15px;margin-right:auto}
+  .btn{background:var(--accent);color:var(--accent-ink);border:none;border-radius:12px;
+    padding:14px 28px;font:inherit;font-weight:700;font-size:19px;cursor:pointer;white-space:nowrap}
+  .btn[disabled]{opacity:.4;cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--accent);border:2px solid var(--accent)}
+  label{display:block;font-weight:700;font-size:16px;margin:14px 0 6px}
+  input[type=text]{width:100%;font:inherit;font-size:21px;padding:12px 14px;border:2px solid var(--line);
+    border-radius:12px;background:#fff;color:var(--ink)}
+  input[type=text]:focus{outline:none;border-color:var(--accent)}
+  .err{color:var(--warn);font-size:16px;margin-top:10px;min-height:1.2em}
+  ul.tips{padding-left:22px;margin:6px 0 4px} ul.tips li{margin:4px 0}
+  .frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;
+    font-size:.82em;line-height:1.05;margin:0 .12em}
+  .frac .n{border-bottom:2px solid currentColor;padding:0 .18em}
+  .frac .d{padding:0 .18em}
+  .mixed{white-space:nowrap}
+  .big{font-size:64px;text-align:center;margin:6px 0 2px}
+  .center{text-align:center}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+  .stat{background:var(--tint);border-radius:12px;padding:10px;text-align:center}
+  .stat b{display:block;font-size:26px}
+  .stat span{font-size:13px;color:var(--muted)}
+  table.res{width:100%;border-collapse:collapse;font-size:16px;margin-top:8px}
+  table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}
+  table.res td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .barcell{width:40%} .mini{height:8px;background:#e7e1d6;border-radius:99px;overflow:hidden}
+  .mini i{display:block;height:100%;background:var(--accent)}
+  :focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite"></main>
+<script>
+const BANK = [{"id": "Q01", "n": 1, "grade": "3", "standard": "3.OA.7", "strand": "Multiply & Divide", "skill": "Multiplication fact", "prompt": "9 × 6 = ?", "options": ["54", "63", "56", "45"], "answer": 0, "svg": ""}, {"id": "Q02", "n": 2, "grade": "3", "standard": "3.OA.1", "strand": "Multiply & Divide", "skill": "Meaning of multiplication", "prompt": "Which story can be solved with 4 × 6?", "options": ["There are 4 bags with 6 apples in each bag. How many apples?", "There are 6 apples. Ana eats 4. How many are left?", "Ana has 4 apples. She gets 6 more. How many apples?", "24 apples are shared by 4 kids. How many does each kid get?"], "answer": 0, "svg": ""}, {"id": "Q03", "n": 3, "grade": "3", "standard": "3.OA.2", "strand": "Multiply & Divide", "skill": "Meaning of division (groups)", "prompt": "There are 24 cookies. Kim puts 6 cookies in each bag. What does 24 ÷ 6 tell you?", "options": ["How many cookies there are in all", "How many bags Kim fills", "How many cookies are in each bag", "How many cookies are left over"], "answer": 1, "svg": ""}, {"id": "Q04", "n": 4, "grade": "3", "standard": "3.OA.6", "strand": "Multiply & Divide", "skill": "Division as unknown factor", "prompt": "Which multiplication fact helps you find 56 ÷ 7?", "options": ["56 × 7 = 392", "5 × 6 = 30", "7 × 8 = 56", "7 × 7 = 49"], "answer": 2, "svg": ""}, {"id": "Q05", "n": 5, "grade": "3", "standard": "3.OA.4", "strand": "Multiply & Divide", "skill": "Unknown factor", "prompt": "8 × ☐ = 48. What number goes in the box?", "options": ["7", "40", "6", "56"], "answer": 2, "svg": ""}, {"id": "Q06", "n": 6, "grade": "3", "standard": "3.OA.3", "strand": "Word Problems", "skill": "Division word problem", "prompt": "28 students sit at tables. 4 students sit at each table. How many tables are needed?", "options": ["7", "112", "24", "32"], "answer": 0, "svg": ""}, {"id": "Q07", "n": 7, "grade": "3", "standard": "3.OA.5", "strand": "Properties & Patterns", "skill": "Associative property", "prompt": "Which is equal to 2 × 5 × 7?", "options": ["10 × 7", "2 × 12", "7 × 7", "2 + 35"], "answer": 0, "svg": ""}, {"id": "Q08", "n": 8, "grade": "3", "standard": "3.OA.5", "strand": "Properties & Patterns", "skill": "Distributive property", "prompt": "Which is equal to 7 × 8?", "options": ["7 + 8 × 5", "7 × 5 + 7 × 3", "7 × 5 × 3", "7 × 5 + 3"], "answer": 1, "svg": ""}, {"id": "Q09", "n": 9, "grade": "3", "standard": "3.NBT.3", "strand": "Multiply & Divide", "skill": "Multiply by multiples of 10", "prompt": "6 × 40 = ?", "options": ["240", "46", "2,400", "24"], "answer": 0, "svg": ""}, {"id": "Q10", "n": 10, "grade": "3", "standard": "3.OA.8", "strand": "Word Problems", "skill": "Two-step word problem", "prompt": "Leo has $50. He buys 3 books that cost $8 each. How much money does he have left?", "options": ["$74", "$24", "$42", "$26"], "answer": 3, "svg": ""}, {"id": "Q11", "n": 11, "grade": "3", "standard": "3.OA.8", "strand": "Word Problems", "skill": "Equation with a letter", "prompt": "Jen had 45 stickers. She gave some away. Now she has 18. Let <em>s</em> be the number of stickers she gave away. Which equation fits the story?", "options": ["18 − <em>s</em> = 45", "<em>s</em> − 45 = 18", "45 + 18 = <em>s</em>", "45 − <em>s</em> = 18"], "answer": 3, "svg": ""}, {"id": "Q12", "n": 12, "grade": "3", "standard": "3.OA.9", "strand": "Properties & Patterns", "skill": "Arithmetic patterns", "prompt": "Look at these products: 4 × 1 = 4, 4 × 2 = 8, 4 × 3 = 12, 4 × 4 = 16, 4 × 5 = 20 … What is true about every product of 4 and a whole number?", "options": ["It switches between odd and even", "It is always odd", "It always ends in 4", "It is always even"], "answer": 3, "svg": ""}, {"id": "Q13", "n": 13, "grade": "3", "standard": "3.MD.7a", "strand": "Area & Perimeter", "skill": "Area by tiling", "prompt": "Each square is 1 square unit. What is the area of the rectangle?", "options": ["28 square units", "10 square units", "20 square units", "24 square units"], "answer": 3, "svg": "<svg viewBox=\"0 0 200 140\" width=\"200\" role=\"img\" aria-label=\"Rectangle made of square tiles, 6 across and 4 down\"><rect x=\"10\" y=\"10\" width=\"180\" height=\"120\" fill=\"var(--tint)\" stroke=\"currentColor\" stroke-width=\"2.5\"/><g stroke=\"currentColor\" stroke-width=\"1.2\"><path d=\"M40 10 L40 130\"/><path d=\"M70 10 L70 130\"/><path d=\"M100 10 L100 130\"/><path d=\"M130 10 L130 130\"/><path d=\"M160 10 L160 130\"/><path d=\"M10 40 L190 40\"/><path d=\"M10 70 L190 70\"/><path d=\"M10 100 L190 100\"/></g></svg>"}, {"id": "Q14", "n": 14, "grade": "3", "standard": "3.MD.7c", "strand": "Area & Perimeter", "skill": "Area model / distributive", "prompt": "This rectangle shows 6 × 14. Which expression also shows its area?", "options": ["6 × 10 × 4", "6 × 10 + 4", "6 × 10 + 6 × 4", "6 + 10 + 4"], "answer": 2, "svg": "<svg viewBox=\"0 0 320 160\" width=\"320\" role=\"img\" aria-label=\"Rectangle 6 tall split into a part 10 wide and a part 4 wide\">\n<g stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linejoin=\"round\">\n<rect x=\"40\" y=\"30\" width=\"200\" height=\"110\" fill=\"var(--tint)\"/>\n<rect x=\"240\" y=\"30\" width=\"70\" height=\"110\" fill=\"var(--accent-soft)\"/>\n</g>\n<g font-size=\"19\" fill=\"currentColor\" font-family=\"inherit\" text-anchor=\"middle\">\n<text x=\"140\" y=\"22\">10</text><text x=\"275\" y=\"22\">4</text><text x=\"22\" y=\"92\">6</text>\n</g></svg>"}, {"id": "Q15", "n": 15, "grade": "3", "standard": "3.MD.7d", "strand": "Area & Perimeter", "skill": "Area of a composite shape", "prompt": "What is the area of this shape? (All corners are square corners.)", "options": ["48 square cm", "24 square cm", "28 square cm", "36 square cm"], "answer": 3, "svg": "<svg viewBox=\"-20 0 300 205\" width=\"300\" role=\"img\" aria-label=\"L-shaped figure: bottom 8 cm, left side 6 cm, top 4 cm, right side 3 cm\">\n<path d=\"M30 20 L130 20 L130 95 L230 95 L230 170 L30 170 Z\" fill=\"var(--tint)\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/>\n<g font-size=\"17\" fill=\"currentColor\" font-family=\"inherit\" text-anchor=\"middle\">\n<text x=\"80\" y=\"14\">4 cm</text><text x=\"130\" y=\"194\">8 cm</text>\n<text x=\"4\" y=\"100\">6 cm</text><text x=\"262\" y=\"138\">3 cm</text>\n</g></svg>"}, {"id": "Q16", "n": 16, "grade": "3", "standard": "3.MD.8", "strand": "Area & Perimeter", "skill": "Perimeter", "prompt": "A rectangle is 5 meters long and 3 meters wide. What is its perimeter?", "options": ["8 meters", "16 meters", "15 meters", "30 meters"], "answer": 1, "svg": ""}, {"id": "Q17", "n": 17, "grade": "3", "standard": "3.NF.1", "strand": "Fractions", "skill": "Fraction of a whole", "prompt": "A pizza is cut into 8 equal slices. Sam eats 3 slices. What fraction of the pizza did Sam eat?", "options": ["{3/5}", "{5/8}", "{3/8}", "{8/3}"], "answer": 2, "svg": ""}, {"id": "Q18", "n": 18, "grade": "3", "standard": "3.NF.1", "strand": "Fractions", "skill": "Meaning of a unit fraction", "prompt": "Which sentence is true about {1/4}?", "options": ["It is bigger than {1/2}", "It is 4 parts out of 1 whole", "It is 1 of 4 parts, and the parts can be any size", "It is 1 of 4 equal parts of a whole"], "answer": 3, "svg": ""}, {"id": "Q19", "n": 19, "grade": "3", "standard": "3.NF.1", "strand": "Fractions", "skill": "Fraction as copies of a unit fraction", "prompt": "{5/6} is the same as …", "options": ["5 copies of {1/6}", "5 + 6", "6 copies of {1/5}", "{1/5} + {1/6}"], "answer": 0, "svg": ""}, {"id": "Q20", "n": 20, "grade": "3", "standard": "3.NF.2", "strand": "Fractions", "skill": "Fraction on a number line", "prompt": "What fraction is at point P?", "options": ["{1/4}", "{3/4}", "{4/3}", "{3/5}"], "answer": 1, "svg": "<svg viewBox=\"0 0 320 90\" width=\"320\" role=\"img\" aria-label=\"Number line from 0 to 1 divided into 4 equal parts, point P at the third mark\">\n<g stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\">\n<path d=\"M20 55 L300 55\"/>\n<path d=\"M30 43 L30 67\"/><path d=\"M95 47 L95 63\"/><path d=\"M160 47 L160 63\"/><path d=\"M225 47 L225 63\"/><path d=\"M290 43 L290 67\"/>\n</g>\n<circle cx=\"225\" cy=\"55\" r=\"8\" fill=\"var(--accent)\"/>\n<g font-size=\"19\" fill=\"currentColor\" font-family=\"inherit\" text-anchor=\"middle\">\n<text x=\"30\" y=\"88\">0</text><text x=\"290\" y=\"88\">1</text><text x=\"225\" y=\"32\" font-weight=\"700\">P</text>\n</g></svg>"}, {"id": "Q21", "n": 21, "grade": "3", "standard": "3.NF.2", "strand": "Fractions", "skill": "Fraction greater than 1 on a number line", "prompt": "What fraction is at point P?", "options": ["1{1/3}", "{5/3}", "{5/6}", "{3/5}"], "answer": 1, "svg": "<svg viewBox=\"0 0 300 90\" width=\"300\" role=\"img\" aria-label=\"Number line from 0 to 2, each whole divided into 3 equal parts, point P at the fifth mark\">\n<g stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\">\n<path d=\"M20 55 L280 55\"/>\n<path d=\"M30 43 L30 67\"/><path d=\"M70 47 L70 63\"/><path d=\"M110 47 L110 63\"/><path d=\"M150 43 L150 67\"/>\n<path d=\"M190 47 L190 63\"/><path d=\"M230 47 L230 63\"/><path d=\"M270 43 L270 67\"/>\n</g>\n<circle cx=\"230\" cy=\"55\" r=\"8\" fill=\"var(--accent)\"/>\n<g font-size=\"19\" fill=\"currentColor\" font-family=\"inherit\" text-anchor=\"middle\">\n<text x=\"30\" y=\"88\">0</text><text x=\"150\" y=\"88\">1</text><text x=\"270\" y=\"88\">2</text><text x=\"230\" y=\"32\" font-weight=\"700\">P</text>\n</g></svg>"}, {"id": "Q22", "n": 22, "grade": "3", "standard": "3.NF.3b", "strand": "Fractions", "skill": "Equivalent fractions", "prompt": "Which fraction is equal to {2/3}?", "options": ["{4/6}", "{3/4}", "{4/3}", "{2/6}"], "answer": 0, "svg": ""}, {"id": "Q23", "n": 23, "grade": "3", "standard": "3.NF.3c", "strand": "Fractions", "skill": "Whole numbers as fractions", "prompt": "Which fraction is equal to 3?", "options": ["{3/3}", "{6/2}", "{1/3}", "{2/6}"], "answer": 1, "svg": ""}, {"id": "Q24", "n": 24, "grade": "3", "standard": "3.NF.3d", "strand": "Fractions", "skill": "Compare: same numerator", "prompt": "Which comparison is true?", "options": ["{3/8} &gt; {3/5}", "You can’t compare them without drawing", "{3/5} &gt; {3/8}", "{3/5} = {3/8}"], "answer": 2, "svg": ""}, {"id": "Q25", "n": 25, "grade": "3", "standard": "3.NF.3d", "strand": "Fractions", "skill": "Compare: same-size whole", "prompt": "Mia ate {2/6} of a sandwich. Jo ate {2/4} of a sandwich that is the same size. Who ate more?", "options": ["There’s no way to tell", "Mia", "Jo", "They ate the same amount"], "answer": 2, "svg": ""}];
+const LIVE = (typeof google !== 'undefined' && google.script && google.script.run) ? true : false;
+
+const COMFORT = [
+  {v:1, em:'😟', t:'I don’t know how to do this'},
+  {v:2, em:'🤔', t:'I’m a little unsure'},
+  {v:3, em:'🙂', t:'I’m pretty sure'},
+  {v:4, em:'😎', t:'I’m very sure — I could explain it'}
+];
+const LETTERS = ['A','B','C','D'];
+
+const S = { student:null, queue:[], pos:0, done:0, choice:null, comfort:null, t0:0, saving:false, log:[] };
+const app = document.getElementById('app');
+
+function fmt(s){
+  return String(s)
+    .replace(/(\d+)\{([^{}\/]+)\/([^{}]+)\}/g,'<span class="mixed">$1<span class="frac"><span class="n">$2</span><span class="d">$3</span></span></span>')
+    .replace(/\{([^{}\/]+)\/([^{}]+)\}/g,'<span class="frac"><span class="n">$1</span><span class="d">$2</span></span>');
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function demoBanner(){return LIVE?'':'<div class="demo">Preview mode — answers are not saved. In the live version every answer goes to your Google Sheet.</div>';}
+
+/* ---------- Welcome ---------- */
+function showWelcome(msg){
+  app.innerHTML = demoBanner() + `
+  <div class="card">
+    <h1>Math Check-In</h1>
+    <p>This is <strong>not</strong> a test you pass or fail. It helps your teacher learn what you already know and what to teach next.</p>
+    <ul class="tips">
+      <li>There is one question on each page. Pick the best answer.</li>
+      <li>Then tell us how sure you feel. Be honest — “I don’t know how” is a helpful answer!</li>
+      <li>Scratch paper is great. Calculators stay put away.</li>
+      <li>You can take a break. Type your name the same way next time and you’ll start where you left off.</li>
+    </ul>
+    <form id="f" autocomplete="off">
+      <label for="fn">First name</label><input type="text" id="fn" maxlength="40" required>
+      <label for="ln">Last name</label><input type="text" id="ln" maxlength="40" required>
+      <div class="err" id="err">${msg?esc(msg):''}</div>
+      <div class="actions"><button class="btn" type="submit" id="go">Start</button></div>
+    </form>
+  </div>`;
+  const f = document.getElementById('f');
+  document.getElementById('fn').focus();
+  f.addEventListener('submit', e=>{
+    e.preventDefault();
+    const fn = document.getElementById('fn').value.trim(), ln = document.getElementById('ln').value.trim();
+    if(!fn || !ln){ document.getElementById('err').textContent='Please type your first and last name.'; return; }
+    const go = document.getElementById('go'); go.disabled = true; go.textContent = 'Loading…';
+    if(LIVE){
+      google.script.run
+        .withSuccessHandler(r=>begin(r))
+        .withFailureHandler(err=>{ go.disabled=false; go.textContent='Start';
+          document.getElementById('err').textContent='Could not connect. Check the internet and try again.'; })
+        .startStudent(fn, ln);
+    } else {
+      begin({key:(fn+' '+ln).toLowerCase(), first:fn, last:ln, answered:[]});
+    }
+  });
+}
+
+function begin(r){
+  S.student = r;
+  const answered = new Set(r.answered || []);
+  S.queue = BANK.filter(q=>!answered.has(q.id));
+  S.done = BANK.length - S.queue.length;
+  S.pos = 0;
+  if(S.queue.length === 0){ showDone(true); return; }
+  if(S.done > 0){ showResume(); return; }
+  showQuestion();
+}
+
+function showResume(){
+  app.innerHTML = demoBanner() + `
+  <div class="card center">
+    <div class="big">👋</div>
+    <h1>Welcome back, ${esc(S.student.first)}!</h1>
+    <p>You already finished ${S.done} of ${BANK.length} questions. Let’s keep going.</p>
+    <div class="actions" style="justify-content:center"><button class="btn" id="go">Keep going</button></div>
+  </div>`;
+  const b = document.getElementById('go'); b.focus(); b.onclick = showQuestion;
+}
+
+/* ---------- Question page ---------- */
+function showQuestion(){
+  const q = S.queue[S.pos];
+  S.choice = null; S.comfort = null; S.t0 = Date.now(); S.saving = false;
+  const n = S.done + 1, N = BANK.length;
+  app.innerHTML = demoBanner() + `
+  <header class="bar">
+    <span class="count">Question ${n} of ${N}</span>
+    <div class="track" aria-hidden="true"><div class="fill" style="width:${((n-1)/N*100).toFixed(1)}%"></div></div>
+    <button class="linkbtn" id="brk">Take a break</button>
+  </header>
+  <section class="card">
+    <div class="prompt">${fmt(q.prompt)}</div>
+    ${q.svg?`<div class="figure">${q.svg}</div>`:''}
+    <div class="opts" role="group" aria-label="Answer choices">
+      ${q.options.map((o,i)=>`<button class="opt" data-i="${i}" aria-pressed="false"><span class="ltr">${LETTERS[i]}</span><span>${fmt(o)}</span></button>`).join('')}
+    </div>
+    <div class="comfort">
+      <h2>How comfortable were you finding the answer?</h2>
+      <div class="scale" role="group" aria-label="How comfortable were you">
+        ${COMFORT.map(c=>`<button class="lk" data-v="${c.v}" aria-pressed="false"><span class="em" aria-hidden="true">${c.em}</span>${c.t}</button>`).join('')}
+      </div>
+    </div>
+    <div class="actions">
+      <span class="hint" id="hint">Choose an answer and how sure you feel.</span>
+      <button class="btn" id="next" disabled>${S.pos === S.queue.length-1 ? 'Finish' : 'Next →'}</button>
+    </div>
+  </section>`;
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pickChoice(+b.dataset.i));
+  app.querySelectorAll('.lk').forEach(b=>b.onclick=()=>pickComfort(+b.dataset.v));
+  document.getElementById('next').onclick = submit;
+  document.getElementById('brk').onclick = showBreak;
+  window.scrollTo(0,0);
+}
+function pickChoice(i){
+  if(S.saving) return; S.choice = i;
+  app.querySelectorAll('.opt').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.i===i));
+  updNext();
+}
+function pickComfort(v){
+  if(S.saving) return; S.comfort = v;
+  app.querySelectorAll('.lk').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===v));
+  updNext();
+}
+function updNext(){
+  const ok = S.choice!==null && S.comfort!==null;
+  document.getElementById('next').disabled = !ok;
+  document.getElementById('hint').textContent = ok ? '' :
+    (S.choice===null ? 'Choose an answer.' : 'Now choose how sure you feel.');
+}
+
+function submit(){
+  if(S.saving || S.choice===null || S.comfort===null) return;
+  S.saving = true;
+  const q = S.queue[S.pos];
+  const payload = { key:S.student.key, first:S.student.first, last:S.student.last,
+    qid:q.id, choice:S.choice, comfort:S.comfort, seconds:Math.round((Date.now()-S.t0)/1000) };
+  const btn = document.getElementById('next'); btn.disabled = true; btn.textContent = 'Saving…';
+  const advance = ()=>{
+    S.done++; S.pos++;
+    if(S.pos >= S.queue.length) finish(); else showQuestion();
+  };
+  if(LIVE){
+    google.script.run
+      .withSuccessHandler(advance)
+      .withFailureHandler(()=>{
+        S.saving = false; btn.disabled = false; btn.textContent = 'Try again';
+        document.getElementById('hint').textContent = 'That didn’t save. Check the internet, then press Try again.';
+      })
+      .submitAnswer(payload);
+  } else {
+    S.log.push({q, choice:S.choice, comfort:S.comfort, correct:S.choice===q.answer, seconds:payload.seconds});
+    setTimeout(advance, 150);
+  }
+}
+
+document.addEventListener('keydown', e=>{
+  if(!document.querySelector('.opt') || e.target.tagName==='INPUT') return;
+  const k = e.key.toUpperCase();
+  const li = LETTERS.indexOf(k);
+  if(li>=0){ pickChoice(li); }
+  else if(['1','2','3','4'].includes(k)){ pickComfort(+k); }
+  else if(k==='ENTER'){ e.preventDefault(); submit(); }
+});
+
+/* ---------- Break / done ---------- */
+function showBreak(){
+  app.innerHTML = demoBanner() + `
+  <div class="card center">
+    <div class="big">☕</div>
+    <h1>Nice work, ${esc(S.student.first)}!</h1>
+    <p>Your answers so far are saved. You finished ${S.done} of ${BANK.length} questions.</p>
+    <p>When you come back, type your name exactly the same way and you’ll pick up right here.</p>
+    <div class="actions" style="justify-content:center">
+      <button class="btn ghost" id="back">Keep going now</button>
+      <button class="btn" id="out">I’m done for today</button>
+    </div>
+  </div>`;
+  document.getElementById('back').onclick = showQuestion;
+  document.getElementById('out').onclick = ()=>{ S.student=null; showWelcome(); };
+}
+
+function finish(){
+  if(LIVE){
+    app.innerHTML = `<div class="card center"><p>Saving your work…</p></div>`;
+    google.script.run.withSuccessHandler(()=>showDone()).withFailureHandler(()=>showDone()).finish(S.student.key);
+  } else showDone();
+}
+
+function showDone(already){
+  app.innerHTML = demoBanner() + `
+  <div class="card center">
+    <div class="big">🎉</div>
+    <h1>You did it, ${esc(S.student.first)}!</h1>
+    <p>${already ? 'You have already finished every question. ' : ''}Thank you for working so hard and being honest about how you felt.
+    Your teacher will use this to plan math just for you.</p>
+  </div>` + (LIVE ? '' : demoResults());
+}
+
+/* ---------- Preview-only teacher summary ---------- */
+function demoResults(){
+  const L = S.log; if(!L.length) return '';
+  const pct = (a,b)=> b? Math.round(a/b*100)+'%' : '—';
+  const right = L.filter(x=>x.correct).length;
+  const solid = L.filter(x=>x.correct && x.comfort>=3).length;
+  const shaky = L.filter(x=>x.correct && x.comfort<=2).length;
+  const mis   = L.filter(x=>!x.correct && x.comfort>=3).length;
+  const gap   = L.filter(x=>!x.correct && x.comfort<=2).length;
+  const groups = {};
+  L.forEach(x=>{ const g = groups[x.q.strand] = groups[x.q.strand]||{n:0,c:0,cf:0}; g.n++; g.c+=x.correct?1:0; g.cf+=x.comfort; });
+  const rows = Object.entries(groups).map(([k,g])=>`<tr><td>${esc(k)}</td><td class="num">${g.c}/${g.n}</td>
+    <td class="barcell"><div class="mini"><i style="width:${g.c/g.n*100}%"></i></div></td><td class="num">${(g.cf/g.n).toFixed(1)}</td></tr>`).join('');
+  return `
+  <div class="card" style="margin-top:16px">
+    <h2>Teacher view (preview only)</h2>
+    <p style="color:var(--muted);font-size:16px">In the live version this lives in your Google Sheet: Student Summary, Item Analysis, and a color-coded Student × Question grid.</p>
+    <div class="stats">
+      <div class="stat"><b>${right}/${L.length}</b><span>correct (${pct(right,L.length)})</span></div>
+      <div class="stat"><b>${solid}</b><span>Solid — right &amp; sure</span></div>
+      <div class="stat"><b>${shaky}</b><span>Shaky — right, unsure</span></div>
+      <div class="stat"><b>${mis}</b><span>Misconception — wrong &amp; sure</span></div>
+    </div>
+    <p style="font-size:15px;color:var(--muted)">Gap (wrong &amp; unsure): ${gap}</p>
+    <table class="res"><tr><th>Strand</th><th class="num">Correct</th><th></th><th class="num">Avg comfort</th></tr>${rows}</table>
+  </div>`;
+}
+
+showWelcome();
+</script>
+</body>
+</html>

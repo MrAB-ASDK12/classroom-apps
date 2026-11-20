@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class Job Wheel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: cheerful game-show for 8-year-olds, but tidy enough for a teacher to run fast
+   IDEA: a carnival prize wheel next to the classroom job chart
+   PICTURE: the big spinning wheel of kids still waiting for a job
+   COLOUR and TYPE: sunny yellow ground, white chart cards, six bright wedge colours; Fredoka + Nunito
+   LAYOUT: wheel left (big), job chart right, rotation chips and history below */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffcf33,#1d1630);--panel:light-dark(#ffffff,#2b2342);--ink:light-dark(#1b1530,#fff7e0);
+--soft:light-dark(#6a6280,#b9b0d4);--line:light-dark(#eadfb8,#41375e);--acc:#f2542d;--ok:#14a38b}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,.f{font-family:Fredoka,Nunito,sans-serif}
+h1{font-size:clamp(32px,4.4vw,52px);line-height:1.05;margin:0;font-weight:700}
+h2{font-size:24px;margin:0 0 12px;font-weight:600}
+.band{padding:clamp(18px,3vw,40px) max(4vw,16px);max-width:1400px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.sub{color:var(--ink);opacity:.75;font-weight:700}
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+button,select,input,textarea{font:inherit;color:inherit}
+.btn{min-height:44px;padding:8px 16px;border-radius:12px;border:2px solid var(--ink);background:var(--panel);font-weight:800;cursor:pointer}
+.btn:hover{transform:translateY(-1px)}
+.btn.big{background:var(--acc);color:#fff;border-color:var(--acc);font-family:Fredoka;font-size:22px;padding:10px 22px}
+.btn.go{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.main{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(16px,3vw,40px);align-items:start}
+.fig{position:relative;aspect-ratio:1;max-height:78vh;width:100%;margin-inline:auto}
+.fig>canvas{position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+.wheelbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin-top:12px}
+.card{background:var(--panel);border-radius:20px;padding:18px;box-shadow:0 6px 0 rgba(0,0,0,.12)}
+.job{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:12px 0;border-bottom:2px dashed var(--line)}
+.job:last-child{border-bottom:0}
+.jn{font-family:Fredoka;font-weight:600;font-size:21px;line-height:1.1}
+.jn small{display:block;font:700 13px Nunito;color:var(--soft)}
+.who{font-family:Fredoka;font-size:26px;font-weight:700;color:var(--acc);grid-column:1/-1}
+.who.empty{color:var(--soft);font-size:18px;font-weight:500}
+.job select{min-height:44px;font-size:16px;border-radius:10px;border:2px solid var(--line);background:var(--panel);padding:4px 8px;grid-column:1/-1}
+.x{min-height:36px;padding:2px 10px;border-radius:10px;border:2px solid var(--line);background:none;cursor:pointer;font-weight:800;color:var(--soft)}
+.status{margin:14px 0 0;font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{padding:6px 12px;border-radius:999px;font-weight:800;font-size:15px;background:var(--panel);border:2px solid var(--ink)}
+.chip.done{opacity:.4;text-decoration:line-through;border-color:transparent}
+.chip.now{background:var(--acc);border-color:var(--acc);color:#fff}
+.lower{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(16px,3vw,40px);margin-top:8px}
+.hist{display:grid;gap:10px}
+.hist table{width:100%;border-collapse:collapse;font-size:15px}
+.hist td{padding:3px 0;border-bottom:1px solid var(--line)}.hist td:last-child{text-align:right;font-weight:800}
+.hist h3{margin:0 0 4px;font-size:17px}
+.note{background:var(--panel);border:2px dashed var(--acc);border-radius:14px;padding:10px 14px;margin-top:14px;font-weight:700}
+.reveal{position:fixed;inset:0;display:none;place-items:center;background:rgba(20,12,40,.55);z-index:5;cursor:pointer;padding:16px}
+.reveal.on{display:grid}
+.rv{background:var(--panel);border-radius:28px;padding:clamp(24px,5vw,56px) clamp(28px,7vw,90px);text-align:center;box-shadow:0 12px 0 rgba(0,0,0,.2);animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.rv .j{font-family:Fredoka;font-size:clamp(22px,3vw,34px);color:var(--soft);font-weight:600}
+.rv .n{font-family:Fredoka;font-size:clamp(56px,10vw,130px);line-height:1;font-weight:700;color:var(--acc);margin-top:6px}
+@keyframes pop{from{transform:scale(.5);opacity:0}}
+dialog{border:0;border-radius:20px;padding:0;background:var(--panel);color:var(--ink);width:min(760px,94vw);max-height:90vh}
+dialog::backdrop{background:rgba(20,12,40,.6)}
+.dlg{padding:22px;display:grid;gap:14px}
+.dlg textarea{width:100%;min-height:150px;font-size:16px;border-radius:12px;border:2px solid var(--line);background:none;padding:10px}
+.jrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.jrow input[type=text]{flex:1 1 200px;min-height:44px;font-size:16px;border-radius:10px;border:2px solid var(--line);background:none;padding:6px 10px}
+.jrow label{display:flex;gap:6px;align-items:center;font-weight:700;font-size:15px}
+.jrow input[type=checkbox]{width:22px;height:22px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:14px;font-weight:800;display:none;gap:12px;align-items:center;z-index:6}
+.toast.on{display:flex}.toast button{background:none;border:2px solid var(--bg);color:var(--bg);border-radius:10px;min-height:36px;font-weight:800;cursor:pointer}
+@media(max-width:860px){.main,.lower{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.rv{animation:none}}
+</style>
+</head>
+<body>
+<div class="band">
+  <header>
+    <div><h1>Class Job Wheel</h1><div class="sub" id="sub">Everyone gets a job before anyone gets a second turn</div><div id="sync" style="font-size:14px;font-weight:700;opacity:.7"></div></div>
+    <div class="tools">
+      <button class="btn" id="bSound">Sound: on</button>
+      <button class="btn" id="bFull">Full screen</button>
+      <button class="btn" id="bEdit">Edit class &amp; jobs</button>
+    </div>
+  </header>
+  <div id="sampleNote" class="note" hidden>These are sample names. Click <b>Edit class &amp; jobs</b> to type in your 17 students.</div>
+</div>
+<div class="band main">
+  <div>
+    <div class="fig"><canvas id="cv" aria-label="Job wheel of students still waiting for a job"></canvas></div>
+    <div class="wheelbar">
+      <button class="btn big" id="bSpin">Spin</button>
+      <button class="btn" id="bAll">Spin all the rest</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2 id="weekTitle">This week's jobs</h2>
+    <div id="jobs"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn go" id="bFinish">Save this week's jobs</button>
+      <button class="btn" id="bClear">Clear and start over</button>
+    </div>
+  </div>
+</div>
+<div class="band lower">
+  <div class="card">
+    <h2>Who's still waiting</h2>
+    <div id="status" class="status"></div>
+    <div id="chips" class="chips"></div>
+  </div>
+  <div class="card">
+    <h2>Past weeks</h2>
+    <div id="hist" class="hist"></div>
+  </div>
+</div>
+
+<div class="reveal" id="reveal"><div class="rv" id="rv"></div></div>
+<div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo">Undo</button></div>
+
+<dialog id="dlg"><form class="dlg" id="form">
+  <h2>Edit class &amp; jobs</h2>
+  <div><h3 style="margin:0 0 6px">Students, one name per line</h3><textarea id="tStudents"></textarea></div>
+  <div><h3 style="margin:0 0 6px">Jobs</h3><div id="jobRows"></div><button type="button" class="btn" id="bAddJob">+ Add a job</button></div>
+  <div><h3 style="margin:0 0 6px">Rotation</h3><button type="button" class="btn" id="bResetRot">Start a fresh rotation (everyone back on the wheel)</button></div>
+  <details><summary style="font-weight:800;cursor:pointer;min-height:32px">Backup or move to another computer</summary>
+    <p style="margin:8px 0">Copy this text and paste it into an email or doc to keep it safe. To restore, paste a backup here and click Load backup.</p>
+    <textarea id="tBackup"></textarea>
+    <div class="row" style="margin-top:8px"><button type="button" class="btn" id="bCopy">Copy backup</button><button type="button" class="btn" id="bLoad">Load backup</button></div>
+  </details>
+  <div class="row"><button type="submit" class="btn go">Save changes</button><button type="button" class="btn" id="bCancel">Cancel</button></div>
+</form></dialog>
+
+<script>
+{
+const KEY='classJobWheel.v1';
+const SAMPLE=['Ava','Ben','Chloe','Diego','Ella','Finn','Grace','Hiro','Isla','Jonah','Kiana','Leo','Maya','Noah','Olivia','Pete','Quinn'];
+const DEFAULT_JOBS=[['Line leader',true],['Board eraser',false],['Blocks area',false],['Games area',false],['Pencil collector',false],['Lunch cart',false]];
+const COLORS=['#f2542d','#2a6fdb','#14a38b','#7b4fd6','#e84a8a','#ff8a00'];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>'j'+Math.random().toString(36).slice(2,8);
+const fresh=()=>({updatedAt:0,students:SAMPLE.slice(),sample:true,jobs:DEFAULT_JOBS.map(([name,teacher])=>({id:uid(),name,teacher})),used:[],cycle:1,week:{},history:[],sound:true});
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!Array.isArray(S.students))S=fresh();
+let undoState=null,spinning=false,rot=0,audio=null;
+let cloud=null,writing=false,dirty=false,wT;
+const setSync=t=>{$('sync').textContent=t};
+const local=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+async function push(){
+  if(!cloud)return;
+  if(writing){dirty=true;return}
+  writing=true;dirty=false;
+  try{await cloud.set({json:JSON.stringify(S),updatedAt:S.updatedAt||0});setSync('Saved — synced across your devices')}
+  catch(e){setSync('Saved on this device (sync paused)')}
+  writing=false;if(dirty)push();
+}
+const save=()=>{S.updatedAt=Date.now();local();clearTimeout(wT);wT=setTimeout(push,600)};
+
+const taken=()=>new Set(S.jobs.map(j=>S.week[j.id]).filter(Boolean));
+function pool(){
+  const t=taken();
+  let p=S.students.filter(s=>!t.has(s)&&!S.used.includes(s)),wrap=false;
+  if(!p.length){p=S.students.filter(s=>!t.has(s));wrap=p.length>0}
+  return {p,wrap};
+}
+const nextJob=()=>S.jobs.find(j=>!j.teacher&&!S.week[j.id]);
+
+/* ---------- wheel ---------- */
+const cv=$('cv'),ctx=cv.getContext('2d');
+let names=[];
+function draw(){
+  const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  if(!r.width)return;
+  cv.width=r.width*dpr;cv.height=r.height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+  const W=r.width,H=r.height,cx=W/2,cy=H/2+8,R=Math.min(W,H)/2-22;
+  const cs=getComputedStyle(document.body),ink=cs.color,panel=cs.getPropertyValue('--panel');
+  ctx.clearRect(0,0,W,H);
+  ctx.beginPath();ctx.arc(cx,cy+6,R+10,0,7);ctx.fillStyle='rgba(0,0,0,.15)';ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,R+10,0,7);ctx.fillStyle=ink;ctx.fill();
+  const list=names.length?names:['All set!'],n=list.length,seg=2*Math.PI/n;
+  for(let i=0;i<n;i++){
+    let c=COLORS[i%6];if(n>1&&i===n-1&&i%6===0)c=COLORS[2];
+    if(!names.length)c='#9a93b0';
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,rot+i*seg,rot+(i+1)*seg);ctx.closePath();
+    ctx.fillStyle=c;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='rgba(255,255,255,.7)';if(n>1)ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(rot+(i+.5)*seg);
+    let fs=Math.min(R*.12,n>1?seg*R*.5:R*.12);
+    ctx.font=`700 ${fs}px Fredoka, Nunito, sans-serif`;
+    const max=R*.66;let w=ctx.measureText(list[i]).width;
+    if(w>max){fs*=max/w;ctx.font=`700 ${fs}px Fredoka, Nunito, sans-serif`}
+    ctx.fillStyle='#fff';ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText(list[i],R-16,1);ctx.restore();
+  }
+  // light edge
+  ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.lineWidth=4;ctx.strokeStyle='rgba(255,255,255,.35)';ctx.stroke();
+  // hub
+  ctx.beginPath();ctx.arc(cx,cy,R*.17,0,7);ctx.fillStyle=panel;ctx.fill();ctx.lineWidth=6;ctx.strokeStyle=ink;ctx.stroke();
+  ctx.fillStyle=ink;ctx.font=`700 ${R*.075}px Fredoka, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(spinning?'…':'SPIN',cx,cy+1);
+  // pointer
+  const py=cy-R-14;
+  ctx.beginPath();ctx.moveTo(cx-R*.07,py-R*.03);ctx.lineTo(cx+R*.07,py-R*.03);ctx.lineTo(cx,py+R*.11);ctx.closePath();
+  ctx.fillStyle='#f2542d';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=ink;ctx.stroke();
+}
+const ro=new ResizeObserver(draw);ro.observe(cv);
+
+function tick(){
+  if(!S.sound||!audio)return;
+  try{const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=1400;g.gain.setValueAtTime(.08,audio.currentTime);
+  g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+.04);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+.05)}catch(e){}
+}
+function ding(){
+  if(!S.sound||!audio)return;
+  try{[660,880,1320].forEach((f,k)=>{const o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime+k*.11;o.type='triangle';o.frequency.value=f;
+  g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.0001,t+.35);o.connect(g).connect(audio.destination);o.start(t);o.stop(t+.4)})}catch(e){}
+}
+function wakeAudio(){if(!audio){try{audio=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(audio&&audio.state==='suspended')audio.resume().catch(()=>{})}
+
+function spin(job,quick){
+  return new Promise(done=>{
+    if(spinning||!job)return done(false);
+    const {p}=pool();if(!p.length)return done(false);
+    spinning=true;names=p.slice();render(true);
+    const n=names.length,seg=2*Math.PI/n,win=Math.floor(Math.random()*n);
+    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const turns=quick||reduce?2:6,dur=quick?1600:reduce?1200:5200;
+    const base=-Math.PI/2-(win+.5)*seg+(Math.random()-.5)*seg*.6,start=rot;
+    const end=base+2*Math.PI*Math.ceil((start+turns*2*Math.PI-base)/(2*Math.PI));
+    const t0=performance.now();let lastIdx=-1;
+    const step=now=>{
+      const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,4);
+      rot=start+(end-start)*e;
+      const idx=Math.floor((((-Math.PI/2-rot)%(2*Math.PI))+4*Math.PI)%(2*Math.PI)/seg);
+      if(idx!==lastIdx){lastIdx=idx;tick()}
+      draw();
+      if(k<1)requestAnimationFrame(step);
+      else{rot%=2*Math.PI;S.week[job.id]=names[win];save();spinning=false;ding();show(job.name,names[win],quick);render();done(true)}
+    };
+    requestAnimationFrame(step);
+  });
+}
+let hideT;
+function show(job,name,quick){
+  $('rv').innerHTML=`<div class="j">${esc(job)}</div><div class="n">${esc(name)}</div>`;
+  $('reveal').classList.add('on');clearTimeout(hideT);hideT=setTimeout(()=>$('reveal').classList.remove('on'),quick?1400:4000);
+}
+
+/* ---------- render ---------- */
+function render(keepWheel){
+  const t=taken(),{p,wrap}=pool();
+  if(!keepWheel&&!spinning)names=p;
+  draw();
+  $('sampleNote').hidden=!S.sample;
+  $('jobs').innerHTML=S.jobs.map(j=>{
+    const who=S.week[j.id];
+    if(j.teacher){
+      const others=S.students.filter(s=>!t.has(s)||s===who);
+      const wait=others.filter(s=>!S.used.includes(s)),had=others.filter(s=>S.used.includes(s));
+      const opt=s=>`<option value="${esc(s)}"${s===who?' selected':''}>${esc(s)}</option>`;
+      return `<div class="job"><div class="jn">${esc(j.name)}<small>Teacher picks</small></div>${who?`<button class="x" data-clear="${j.id}" aria-label="Clear ${esc(j.name)}">Clear</button>`:'<span></span>'}
+      <select data-pick="${j.id}" aria-label="Choose ${esc(j.name)}"><option value="">Choose a student…</option>
+      ${wait.length?`<optgroup label="Still waiting for a job">${wait.map(opt).join('')}</optgroup>`:''}
+      ${had.length?`<optgroup label="Already had a job">${had.map(opt).join('')}</optgroup>`:''}</select></div>`;
+    }
+    return `<div class="job"><div class="jn">${esc(j.name)}</div>${who?`<button class="x" data-clear="${j.id}" aria-label="Re-spin ${esc(j.name)}">Re-spin</button>`:`<button class="x" data-spin="${j.id}">Spin</button>`}
+    <div class="who ${who?'':'empty'}">${who?esc(who):'Not chosen yet'}</div></div>`;
+  }).join('');
+  const nj=nextJob();
+  $('bSpin').textContent=nj?`Spin for ${nj.name}`:'All jobs chosen!';
+  $('bSpin').disabled=$('bAll').disabled=!nj||spinning||!p.length;
+  $('bFinish').disabled=!t.size||spinning;
+  const waiting=S.students.filter(s=>!S.used.includes(s)&&!t.has(s));
+  $('status').textContent=`Rotation ${S.cycle}: ${waiting.length} of ${S.students.length} kids still waiting for a job`+(wrap?' — everyone has had a turn, so the wheel starts the next rotation':'');
+  $('chips').innerHTML=S.students.map(s=>`<span class="chip ${t.has(s)?'now':S.used.includes(s)?'done':''}">${esc(s)}</span>`).join('');
+  $('hist').innerHTML=S.history.length?S.history.slice(0,6).map(h=>`<div><h3>${esc(h.label)}</h3><table>${h.rows.map(([a,b])=>`<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join('')}</table></div>`).join(''):'<p style="margin:0;color:var(--soft)">Saved weeks will show up here.</p>';
+  $('bSound').textContent='Sound: '+(S.sound?'on':'off');
+}
+
+/* ---------- actions ---------- */
+const snap=()=>JSON.stringify(S);
+function toast(msg,undo){
+  $('toastMsg').textContent=msg;undoState=undo||null;$('toastUndo').hidden=!undo;
+  $('toast').classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('on'),7000);
+}
+$('toastUndo').onclick=()=>{if(undoState){S=JSON.parse(undoState);save();render()}$('toast').classList.remove('on')};
+$('bSpin').onclick=()=>{wakeAudio();spin(nextJob())};
+cv.onclick=()=>{wakeAudio();spin(nextJob())};
+$('bAll').onclick=async()=>{wakeAudio();let j;while((j=nextJob())&&pool().p.length){if(!await spin(j,true))break;await new Promise(r=>setTimeout(r,1500))}};
+$('jobs').onclick=e=>{
+  const c=e.target.dataset.clear,s=e.target.dataset.spin;
+  if(c&&!spinning){delete S.week[c];save();render()}
+  if(s){wakeAudio();spin(S.jobs.find(j=>j.id===s))}
+};
+$('jobs').onchange=e=>{const id=e.target.dataset.pick;if(!id)return;if(e.target.value)S.week[id]=e.target.value;else delete S.week[id];save();render()};
+$('reveal').onclick=()=>$('reveal').classList.remove('on');
+$('bFinish').onclick=()=>{
+  const before=snap();
+  const assigned=S.jobs.map(j=>S.week[j.id]).filter(Boolean);
+  const used=new Set(S.used),repeats=assigned.filter(s=>used.has(s));
+  assigned.forEach(s=>used.add(s));
+  if(S.students.every(s=>used.has(s))){S.used=repeats;S.cycle++}else S.used=[...used];
+  const d=new Date();
+  S.history.unshift({label:'Chosen '+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}),rows:S.jobs.filter(j=>S.week[j.id]).map(j=>[j.name,S.week[j.id]])});
+  S.history=S.history.slice(0,40);S.week={};save();render();
+  toast('Week saved. The wheel is ready for next week.',before);
+};
+$('bClear').onclick=()=>{const before=snap();S.week={};save();render();toast('Cleared this week\'s picks.',before)};
+$('bSound').onclick=()=>{S.sound=!S.sound;save();render();if(S.sound){wakeAudio();tick()}};
+$('bFull').onclick=()=>{try{const d=document;(d.fullscreenElement?d.exitFullscreen():d.documentElement.requestFullscreen()).catch(()=>toast('Full screen isn\'t allowed here — try your browser\'s full-screen key (F11 or Ctrl+Cmd+F).'))}catch(e){toast('Full screen isn\'t allowed here — try your browser\'s full-screen key.')}};
+
+/* ---------- edit dialog ---------- */
+let draftJobs=[];
+const jobRows=()=>{$('jobRows').innerHTML=draftJobs.map((j,i)=>`<div class="jrow"><input type="text" data-i="${i}" value="${esc(j.name)}" aria-label="Job name">
+  <label><input type="checkbox" data-t="${i}"${j.teacher?' checked':''}> Teacher picks</label>
+  <button type="button" class="x" data-up="${i}" aria-label="Move up">↑</button><button type="button" class="x" data-del="${i}">Remove</button></div>`).join('')};
+$('bEdit').onclick=()=>{
+  $('tStudents').value=S.students.join('\n');draftJobs=S.jobs.map(j=>({...j}));jobRows();
+  $('tBackup').value=JSON.stringify(S);$('dlg').showModal();
+};
+$('jobRows').oninput=e=>{const i=e.target.dataset.i;if(i!=null)draftJobs[i].name=e.target.value};
+$('jobRows').onchange=e=>{const i=e.target.dataset.t;if(i!=null)draftJobs[i].teacher=e.target.checked};
+$('jobRows').onclick=e=>{
+  const d=e.target.dataset.del,u=e.target.dataset.up;
+  if(d!=null){draftJobs.splice(d,1);jobRows()}
+  if(u>0){const k=+u;[draftJobs[k-1],draftJobs[k]]=[draftJobs[k],draftJobs[k-1]];jobRows()}
+};
+$('bAddJob').onclick=()=>{draftJobs.push({id:uid(),name:'New job',teacher:false});jobRows();const ins=$('jobRows').querySelectorAll('input[type=text]');ins[ins.length-1].select()};
+$('bCancel').onclick=()=>$('dlg').close();
+$('bResetRot').onclick=()=>{const before=snap();S.used=[];S.cycle++;save();render();$('dlg').close();toast('Fresh rotation started — everyone is back on the wheel.',before)};
+$('bCopy').onclick=()=>{navigator.clipboard.writeText($('tBackup').value).then(()=>toast('Backup copied.'),()=>{$('tBackup').select();toast('Press Ctrl+C (Cmd+C) to copy the selected text.')})};
+$('bLoad').onclick=()=>{try{const n=JSON.parse($('tBackup').value);if(!Array.isArray(n.students)||!Array.isArray(n.jobs))throw 0;const before=snap();S=n;save();render();$('dlg').close();toast('Backup loaded.',before)}catch(e){toast('That backup text didn\'t look right.')}};
+$('form').onsubmit=e=>{
+  e.preventDefault();const before=snap();
+  const list=[...new Set($('tStudents').value.split('\n').map(s=>s.trim()).filter(Boolean))];
+  if(!list.length){toast('Add at least one student.');return}
+  if(list.join()!==S.students.join())S.sample=false;
+  S.students=list;
+  S.jobs=draftJobs.map(j=>({...j,name:j.name.trim()})).filter(j=>j.name);
+  S.used=S.used.filter(s=>list.includes(s));
+  for(const id in S.week)if(!S.jobs.some(j=>j.id===id)||!list.includes(S.week[id]))delete S.week[id];
+  save();render();$('dlg').close();toast('Changes saved.',before);
+};
+document.fonts&&document.fonts.ready.then(draw);
+render();
+setSync('Saved in this browser on this device. Use "Backup" under Edit class & jobs to keep a copy.');
+}
+</script>
+</body>
+</html>
