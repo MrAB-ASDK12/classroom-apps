@@ -10,6 +10,7 @@ Small, free classroom tools built with Claude by a working teacher. There are no
 | Math Jeopardy: 7th Grade | `jeopardy/7th-grade/` | Scores, in the browser |
 | Math Check-In (previews and setup guide) | `math-check-in/` | The teacher's own Google Sheet |
 | The +30 Button | `plus30/` | Nothing |
+| Spelling Check-In (plus printable diagnostic packet) | `spelling-check-in/` | The browser on the classroom computer (CSV export) |
 
 Every app is a single, self-contained HTML file. To change an app, replace its `index.html` and commit.
 
