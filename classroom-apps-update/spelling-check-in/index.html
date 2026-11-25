@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spelling Check-In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: friendly classroom tool for 8-year-olds, calm and clear for the teacher
+   IDEA: a spelling notebook page: blue rules, red margin line, pencil-yellow accent
+   PICTURE: the working tool itself: name buttons, the word list, the report
+   COLOUR and TYPE: paper white, navy ink, rule blue, margin red, pencil yellow; Andika (made for early readers)
+   LAYOUT: one calm column up to 900px, big tap targets, stacks cleanly on a phone */
+:root{color-scheme:light dark;
+--bg:light-dark(#fbfaf6,#141a2b);--paper:light-dark(#ffffff,#1c2338);--ink:light-dark(#1d2b4f,#e9edf7);--soft:light-dark(#5a6684,#a9b3cc);
+--rule:light-dark(#cfe1f3,#2b3a5c);--blue:light-dark(#2f6fb5,#7fb2ec);--red:light-dark(#c8423b,#ef7a72);--pencil:#f2b705;--good:light-dark(#2e7d4f,#6fd19a);
+--mbg:light-dark(#e4f4ea,#1d3b2b);--ubg:light-dark(#fff3cc,#40371a);--nbg:light-dark(#fde5e3,#47221f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 Andika,"Comic Sans MS",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:920px;margin:0 auto;padding:clamp(18px,4vw,40px) max(4vw,14px) 60px}
+.sheet{background:var(--paper);border-radius:14px;box-shadow:0 2px 0 var(--rule),0 10px 30px rgba(20,30,60,.08);padding:clamp(18px,3vw,32px) clamp(16px,3vw,32px) clamp(18px,3vw,32px) clamp(30px,5vw,56px);position:relative;
+background-image:repeating-linear-gradient(transparent 0 35px,var(--rule) 35px 36px);background-position:0 70px}
+.sheet::before{content:"";position:absolute;top:0;bottom:0;left:clamp(18px,3vw,36px);width:2px;background:var(--red);opacity:.55}
+h1{font-size:clamp(32px,6vw,48px);line-height:1.05;margin:0 0 6px;text-wrap:balance}
+h2{font-size:24px;margin:26px 0 8px;line-height:1.2}
+h3{font-size:19px;margin:18px 0 6px}
+p{margin:0 0 12px}.muted{color:var(--soft)}.small{font-size:14px}
+button,input,textarea,select{font:inherit;color:inherit}
+button{min-height:44px;border-radius:10px;border:2px solid var(--ink);background:var(--paper);padding:8px 16px;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--pencil);outline-offset:2px}
+button.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+button.ghost{border-color:transparent;background:transparent;text-decoration:underline;color:var(--soft)}
+button.danger{border-color:var(--red);color:var(--red)}
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr));gap:12px;margin-top:18px}
+.names button{font-size:21px;font-weight:700;min-height:64px;background:var(--paper);border-color:var(--blue)}
+.names button .done{display:block;font-size:13px;font-weight:400;color:var(--good)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.pencil{display:inline-block;width:64px;height:16px;border-radius:3px;background:linear-gradient(90deg,#f4a7a1 0 14%,#b9b9b9 14% 22%,var(--pencil) 22% 86%,#e8c79a 86%);clip-path:polygon(0 0,86% 0,100% 50%,86% 100%,0 100%);vertical-align:middle;margin-right:10px}
+.test{margin-top:22px}
+.test h2{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.test h2 small{font-size:15px;color:var(--soft);font-weight:400}
+.word{display:grid;grid-template-columns:2.4em minmax(0,1fr) auto;gap:10px;align-items:center;min-height:56px;padding:6px 0;border-bottom:1px dashed var(--rule)}
+.word .n{color:var(--soft);text-align:right}
+.word .w{font-size:24px;font-weight:700;letter-spacing:.02em}
+.word.miss .w{color:var(--red);text-decoration:line-through;text-decoration-thickness:2px}
+.word .typed{grid-column:2/4;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.word input{font-size:22px;padding:8px 12px;border:2px solid var(--red);border-radius:10px;background:var(--paper);width:min(100%,320px)}
+.missbtn{font-size:15px}
+.word.miss .missbtn{background:var(--red);border-color:var(--red);color:#fff}
+.bar{position:sticky;bottom:0;background:var(--bg);padding:14px 0;margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center;border-top:2px solid var(--rule)}
+.big{font-size:22px;padding:12px 28px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--paper)}
+textarea{width:100%;min-height:220px;padding:12px;border:2px solid var(--rule);border-radius:10px;background:var(--paper);font-size:17px}
+label.check{display:inline-flex;gap:8px;align-items:center;margin:4px 16px 4px 0;min-height:44px}
+label.check input{width:22px;height:22px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--paper)}
+th,td{border:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:light-dark(#eef4fb,#232d48)}
+td.c,th.c{text-align:center}
+.st{display:inline-block;min-width:2em;padding:1px 6px;border-radius:6px;font-weight:700;text-align:center}
+.st.M{background:var(--mbg);color:var(--good)}.st.U{background:var(--ubg);color:light-dark(#8a6200,#f2d36b)}.st.N{background:var(--nbg);color:var(--red)}.st.X{color:var(--soft)}
+.need{border-left:6px solid var(--pencil);padding:10px 14px;margin:12px 0;background:light-dark(#fffbea,#2a2a1e);border-radius:0 10px 10px 0}
+.need.N{border-left-color:var(--red);background:light-dark(#fff3f2,#2d1f22)}
+.need ul{margin:6px 0 6px;padding-left:20px}
+.ev{font-family:inherit;color:var(--red);font-weight:700}
+.start{font-size:20px;font-weight:700;padding:12px 16px;border:2px solid var(--blue);border-radius:12px;margin:12px 0}
+.overlay{position:fixed;inset:0;background:rgba(10,15,30,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}
+.dialog{background:var(--paper);border-radius:14px;padding:24px;max-width:460px;width:100%}
+.dialog .row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.star{font-size:64px;line-height:1;color:var(--pencil)}
+.hidden{display:none!important}
+@media(max-width:600px){.word{grid-template-columns:1.8em minmax(0,1fr)}.word .missbtn{grid-column:2}.word .typed{grid-column:2}table{font-size:13px}}
+@media print{.noprint{display:none!important}body{background:#fff}.sheet{box-shadow:none;background-image:none}.sheet::before{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="modal"></div>
+<script>
+{
+const KEY="spellcheck.v1";
+const CATS={
+A:["Beginning blends, digraphs and silent letters","Practice blends, digraphs and silent-letter pairs (sl, ch, th, cl, scr, spl, wr, kn) with picture and word sorts."],
+B:["Short vowels","Sort short-vowel words by vowel sound (a, e, i, o, u). Practice CVC and blend words like sled, chip, splash."],
+C:["Final consonant patterns","Contrast endings after short vowels: ck vs. k, ch vs. tch, ge vs. dge, plus final blends like mp."],
+D:["Long vowel patterns","Sort long-vowel words by pattern: CVCe (slide, flame) vs. vowel teams (ai, ee, oa, ow, igh)."],
+E:["Other vowels (r-controlled, diphthongs)","Sort r-controlled vowels (ir, ur, or) and diphthongs (ow/ou, oi, aw) by sound, then by spelling."],
+F:["Inflected endings and plurals","Teach the three rules for adding endings: double the consonant, drop the e, change y to i. Sort base words by the rule they need."],
+G:["Syllable juncture and unaccented syllables","Sort two-syllable words: doubled middles (rabbit), open (ti-ger) vs. closed (cab-in), and final -le, -ar, -or, -er."],
+H:["Prefixes and suffixes","Build words from base + affixes and keep the base intact (hope + less, care + ful + ly, un + friend + ly)."],
+I:["Derivational patterns","Explore related words that keep their spelling (music/musician, explode/explosion, compete/competition). Sort -able/-ible and -tion/-sion/-cian."]};
+const re=s=>a=>new RegExp(s).test(a);
+const ch=v=>a=>((a.match(/[aeiou]+/)||[""])[0])===v;
+const ce=v=>a=>new RegExp("^[^aeiou]*"+v+"[^aeiou]+e$").test(a);
+const TESTS=["Short vowels, blends, long vowels","Complex consonants, r-controlled vowels, diphthongs","Endings, plurals, syllables","Prefixes, suffixes, related words"];
+const W=[
+[1,"sled",1,[["A","sl",re("^sl")],["B","short e",ch("e")]]],
+[2,"chip",1,[["A","ch",re("^ch")],["B","short i",ch("i")]]],
+[3,"thump",1,[["A","th",re("^th")],["C","mp",re("mp$")]]],
+[4,"clock",1,[["A","cl",re("^cl")],["C","ck",re("ck$")]]],
+[5,"brush",1,[["B","short u",ch("u")],["C","sh",re("sh$")]]],
+[6,"slide",1,[["D","i_e",ce("i")]]],
+[7,"stove",1,[["D","o_e",ce("o")]]],
+[8,"flame",1,[["D","a_e",ce("a")]]],
+[9,"trail",1,[["D","ai",ch("ai")]]],
+[10,"cheek",1,[["D","ee",ch("ee")]]],
+[11,"float",1,[["D","oa",ch("oa")]]],
+[12,"glow",1,[["D","ow",re("ow$")]]],
+[13,"bright",1,[["D","igh",re("igh")]]],
+[14,"scrap",2,[["A","scr",re("^scr")],["B","short a",ch("a")]]],
+[15,"splash",2,[["A","spl",re("^spl")],["B","short a",ch("a")]]],
+[16,"patch",2,[["B","short a",ch("a")],["C","tch",re("tch$")]]],
+[17,"fudge",2,[["B","short u",ch("u")],["C","dge",re("dge$")]]],
+[18,"shirt",2,[["E","ir",re("ir")]]],
+[19,"storm",2,[["E","or",re("or")]]],
+[20,"nurse",2,[["E","ur",re("ur")]]],
+[21,"crowd",2,[["E","ow",re("ow")]]],
+[22,"mouth",2,[["E","ou",re("ou")]]],
+[23,"joint",2,[["E","oi",re("oi")]]],
+[24,"straw",2,[["E","aw",re("aw")]]],
+[25,"wreck",2,[["A","wr",re("^wr")],["B","short e",ch("e")]]],
+[26,"knight",2,[["A","kn",re("^kn")],["D","igh",re("igh")]]],
+[27,"hopping",3,[["F","double p + ing",re("pping$")]]],
+[28,"hoping",3,[["F","drop e + ing",re("^[^p]*p(?!p)ing$")]]],
+[29,"cried",3,[["F","y to i + ed",re("ied$")]]],
+[30,"stopped",3,[["F","double p + ed",re("pped$")]]],
+[31,"babies",3,[["F","y to i + es",re("ies$")]]],
+[32,"boxes",3,[["F","-es plural",re("xes$")]]],
+[33,"rabbit",3,[["G","bb (doubled middle)",re("bb")]]],
+[34,"tiger",3,[["G","ti-ger (open syllable)",re("^ti?g(?!g)")]]],
+[35,"cabin",3,[["G","cab-in (closed syllable)",re("^cab(?!b)")]]],
+[36,"puddle",3,[["G","dd + -le",re("ddle$")]]],
+[37,"dollar",3,[["G","-ar",re("ar$")]]],
+[38,"doctor",3,[["G","-or",re("or$")]]],
+[39,"unfriendly",4,[["H","un- + -ly",re("^un.*ly$")]]],
+[40,"hopeless",4,[["H","-less (keep the e)",re("eless$")]]],
+[41,"carefully",4,[["H","-ful + -ly",re("fully$")]]],
+[42,"preview",4,[["H","pre-",re("^pre")]]],
+[43,"action",4,[["H","-tion",re("tion$")]]],
+[44,"pleasure",4,[["I","-sure",re("sure$")]]],
+[45,"explosion",4,[["I","explode → -sion",re("sion$")]]],
+[46,"comfortable",4,[["I","-able",re("able$")]]],
+[47,"visible",4,[["I","-ible",re("ible$")]]],
+[48,"musician",4,[["I","music → -cian",re("cian$")]]],
+[49,"competition",4,[["I","compete → compet-i-tion",re("petition$")]]],
+[50,"autumn",4,[["I","silent n (autumnal)",re("mn$")]]]];
+
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let S={roster:[],tests:[1,2,3,4],pin:"",subs:{}};
+let mem=null;
+try{const t=localStorage.getItem(KEY);if(t)S=Object.assign(S,JSON.parse(t))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){mem=S}};
+const app=document.getElementById("app"),modal=document.getElementById("modal");
+let view={page:"home"},draft={},teacherOK=false,tTab="results",openStudent=null;
+
+function analyze(name){
+ const sub=S.subs[name];if(!sub)return null;
+ const cats={};Object.keys(CATS).forEach(k=>cats[k]={pts:0,poss:0,miss:[]});
+ let correct=0,given=0;const other=[];
+ W.filter(w=>S.tests.includes(w[2])).forEach(([n,word,t,feats])=>{
+  given++;
+  const has=Object.prototype.hasOwnProperty.call(sub.e,n);
+  const raw=has?sub.e[n]:null;const a=raw==null?word:raw.trim().toLowerCase().replace(/[^a-z]/g,"");
+  const ok=a===word;if(ok)correct++;
+  let anyMiss=false;
+  feats.forEach(([c,label,fn])=>{cats[c].poss++;
+   const hit=ok||(a!==""&&fn(a));
+   if(hit)cats[c].pts++;else{anyMiss=true;cats[c].miss.push({label,word,a:raw===""?"(left blank)":raw})}});
+  if(!ok&&!anyMiss)other.push({word,a:raw});
+ });
+ let fp=0,fposs=0;
+ Object.values(cats).forEach(c=>{fp+=c.pts;fposs+=c.poss;
+  c.st=c.poss===0?"X":(c.poss-c.pts<=1?"M":(c.pts>=c.poss/2?"U":"N"))});
+ const order=Object.keys(CATS);
+ const start=order.find(k=>cats[k].st==="U")||order.find(k=>cats[k].st==="N")||null;
+ return {cats,correct,given,fp,fposs,start,other,date:sub.d};
+}
+const stName={M:"Mastered",U:"Using but confusing",N:"Not yet",X:"Not tested"};
+
+function render(){
+ if(view.page==="home")return home();
+ if(view.page==="student")return student();
+ if(view.page==="thanks")return thanks();
+ if(view.page==="teacher")return teacher();
+}
+function home(){
+ const names=S.roster;
+ app.innerHTML=`<div class="sheet">
+ <div class="top"><div><h1><span class="pencil" aria-hidden="true"></span>Spelling Check-In</h1>
+ <p class="muted">Find your name and tap it.</p></div>
+ <button class="ghost noprint" id="tbtn">Teacher</button></div>
+ ${names.length?`<div class="names">${names.map((n,i)=>`<button data-i="${i}">${esc(n)}${S.subs[n]?'<span class="done">✓ done</span>':''}</button>`).join("")}</div>`
+ :`<p style="margin-top:20px">No class list yet. Your teacher needs to add names first.</p><button class="primary" id="setup">Set up class list</button>`}
+ </div>`;
+ app.querySelectorAll(".names button").forEach(b=>b.onclick=()=>{const n=S.roster[b.dataset.i];
+  if(S.subs[n])return ask(`${n}, you already turned this in. Do it again?`,"Do it again",()=>startStudent(n));startStudent(n)});
+ const tb=document.getElementById("tbtn");if(tb)tb.onclick=enterTeacher;
+ const su=document.getElementById("setup");if(su)su.onclick=enterTeacher;
+}
+function startStudent(n){draft={};const s=S.subs[n];if(s)Object.assign(draft,s.e);view={page:"student",name:n};render();scrollTo(0,0)}
+function student(){
+ const n=view.name;
+ const tests=S.tests.slice().sort();
+ app.innerHTML=`<div class="sheet">
+ <h1>Hi, ${esc(n)}!</h1>
+ <p>Look at your spelling test. Find each word you got <b>wrong</b>. Tap <b>I missed it</b>, then type the word <b>exactly the way you wrote it</b>, mistakes and all.</p>
+ <p class="muted small">If you left a word blank, tap I missed it and leave the box empty.</p>
+ ${tests.map(t=>`<section class="test"><h2>Test ${t} <small>${esc(TESTS[t-1])}</small></h2>
+ ${W.filter(w=>w[2]===t).map(([num,word])=>{const m=Object.prototype.hasOwnProperty.call(draft,num);
+  return `<div class="word${m?" miss":""}" data-n="${num}"><span class="n">${num}.</span><span class="w">${word}</span>
+  <button class="missbtn" aria-pressed="${m}">${m?"Missed ✗":"I missed it"}</button>
+  ${m?`<div class="typed"><label for="in${num}" class="small muted">How I spelled it:</label><input id="in${num}" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(draft[num])}"></div>`:""}</div>`}).join("")}
+ </section>`).join("")}
+ <div class="bar noprint"><button class="ghost" id="back">Not me / go back</button>
+ <span class="muted small" id="cnt">${Object.keys(draft).length} missed</span>
+ <button class="primary big" id="done">I'm done</button></div></div>`;
+ app.querySelectorAll(".word").forEach(row=>{const num=+row.dataset.n;
+  row.querySelector(".missbtn").onclick=()=>{
+   if(Object.prototype.hasOwnProperty.call(draft,num))delete draft[num];else draft[num]="";
+   const y=scrollY;render();scrollTo(0,y);const inp=document.getElementById("in"+num);if(inp)inp.focus()};
+  const inp=row.querySelector("input");if(inp)inp.oninput=()=>{draft[num]=inp.value}});
+ document.getElementById("back").onclick=()=>{view={page:"home"};render()};
+ document.getElementById("done").onclick=()=>{
+  const wrong=Object.entries(draft).filter(([k,v])=>v.trim().toLowerCase()===W[k-1][1]);
+  const k=Object.keys(draft).length;
+  const finish=()=>{S.subs[n]={d:new Date().toISOString().slice(0,10),e:Object.fromEntries(Object.entries(draft).filter(([k,v])=>v.trim().toLowerCase()!==W[k-1][1]))};save();view={page:"thanks",name:n};render();scrollTo(0,0)};
+  if(wrong.length)return ask(`You typed ${wrong.map(([k])=>W[k-1][1]).join(", ")} spelled the right way. Type it the way you wrote it on your test. If you really spelled it right, tap Keep going.`,"Keep going",finish);
+  ask(k?`You marked ${k} word${k>1?"s":""} as missed. Did you type each one the way you wrote it?`:"You didn't mark any missed words. Did you really spell every word right?","Yes, I'm done",finish);
+ };
+}
+function thanks(){
+ app.innerHTML=`<div class="sheet" style="text-align:center"><div class="star" aria-hidden="true">★</div><h1>Thanks, ${esc(view.name)}!</h1><p>Your teacher will use this to plan your spelling work.</p><button class="primary big" id="h">Next student</button></div>`;
+ document.getElementById("h").onclick=()=>{view={page:"home"};render()};
+ setTimeout(()=>{if(view.page==="thanks"){view={page:"home"};render()}},8000);
+}
+function enterTeacher(){
+ if(!S.pin||teacherOK){teacherOK=true;view={page:"teacher"};if(!S.roster.length)tTab="setup";return render()}
+ modal.innerHTML=`<div class="overlay"><form class="dialog"><h3>Teacher PIN</h3><input id="pin" type="password" inputmode="numeric" style="font-size:20px;padding:8px;width:100%"><p class="small muted" id="perr"></p><div class="row"><button type="button" id="c">Cancel</button><button class="primary">Open</button></div></form></div>`;
+ const f=modal.querySelector("form");document.getElementById("pin").focus();
+ document.getElementById("c").onclick=()=>modal.innerHTML="";
+ f.onsubmit=e=>{e.preventDefault();if(document.getElementById("pin").value===S.pin){modal.innerHTML="";teacherOK=true;view={page:"teacher"};render()}else document.getElementById("perr").textContent="That PIN doesn't match."};
+}
+function ask(msg,yes,fn){
+ modal.innerHTML=`<div class="overlay"><div class="dialog"><p style="font-size:19px">${esc(msg)}</p><div class="row"><button id="no">Go back</button><button class="primary" id="yes">${esc(yes)}</button></div></div></div>`;
+ document.getElementById("no").onclick=()=>modal.innerHTML="";
+ document.getElementById("yes").onclick=()=>{modal.innerHTML="";fn()};document.getElementById("yes").focus();
+}
+function teacher(){
+ const tabs=[["results","Class results"],["setup","Set up"]];
+ app.innerHTML=`<div class="sheet"><div class="top"><h1>Teacher</h1><button class="noprint" id="exit">Back to student names</button></div>
+ <div class="tabs noprint" role="tablist">${tabs.map(([k,l])=>`<button role="tab" aria-selected="${tTab===k}" data-t="${k}">${l}</button>`).join("")}</div>
+ <div id="tp"></div></div>`;
+ app.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{tTab=b.dataset.t;openStudent=null;render()});
+ document.getElementById("exit").onclick=()=>{teacherOK=false;view={page:"home"};render()};
+ const tp=document.getElementById("tp");
+ if(tTab==="setup")return setup(tp);
+ if(openStudent)return report(tp,openStudent);
+ results(tp);
+}
+function setup(tp){
+ tp.innerHTML=`<h2>Class list</h2><p class="muted small">One student per line. Use the names students will recognize.</p>
+ <textarea id="ros">${esc(S.roster.join("\n"))}</textarea>
+ <h2>Tests given</h2><p class="muted small">Students only see the tests you check, and results only count those tests.</p>
+ ${[1,2,3,4].map(t=>`<label class="check"><input type="checkbox" value="${t}" ${S.tests.includes(t)?"checked":""}>Test ${t}: ${esc(TESTS[t-1])}</label>`).join("<br>")}
+ <h2>Teacher PIN (optional)</h2><p class="muted small">Keeps students out of this page. Leave blank for no PIN.</p>
+ <input id="pinset" value="${esc(S.pin)}" style="font-size:18px;padding:8px;border:2px solid var(--rule);border-radius:10px;width:min(100%,220px)">
+ <div class="bar"><span class="muted small" id="msg"></span><button class="primary big" id="sv">Save</button></div>
+ <h2>Data</h2><p class="muted small">Results are saved in this browser on this computer only. Use the same computer and browser for every student, and don't clear browsing data. Export a CSV after each round as a backup.</p>
+ <button id="sample">Load a sample class to try it</button> <button class="danger" id="wipe">Erase all results</button>`;
+ document.getElementById("sv").onclick=()=>{
+  S.roster=[...new Set(document.getElementById("ros").value.split("\n").map(s=>s.trim()).filter(Boolean))];
+  S.tests=[...tp.querySelectorAll("input[type=checkbox]:checked")].map(x=>+x.value);if(!S.tests.length)S.tests=[1];
+  S.pin=document.getElementById("pinset").value.trim();save();document.getElementById("msg").textContent="Saved.";};
+ document.getElementById("wipe").onclick=()=>ask("Erase every student's results? The class list stays.","Erase",()=>{S.subs={};save();render()});
+ document.getElementById("sample").onclick=()=>ask("Replace the class list and results with 4 made-up sample students?","Load sample",()=>{
+  S.roster=["Sample: Ava","Sample: Ben","Sample: Cora","Sample: Dev"];S.tests=[1,2,3,4];
+  S.subs={"Sample: Ava":{d:"2026-11-24",e:{39:"unfrendly",45:"explotion",46:"comfortible",48:"musition",49:"compitition",50:"autum"}},
+   "Sample: Ben":{d:"2026-11-24",e:{16:"pach",17:"fuge",21:"crowed",23:"joynt",27:"hoping",28:"hopeing",29:"cryed",30:"stoped",31:"babys",34:"tigger",37:"doller",38:"docter",41:"carefuly",44:"plesher",45:"explosen",46:"comfterbul",47:"visabul",48:"musishun",49:"compatishun",50:"autum",40:"hopless",43:"acshun",25:"reck",26:"nite"}},
+   "Sample: Cora":{d:"2026-11-24",e:{27:"hoping",30:"stopt",31:"babys",36:"pudle",37:"doller",38:"docter",41:"carefuly",44:"plezhure",45:"explozion",46:"comfortible",47:"visable",48:"mushian",49:"competision",50:"autum"}},
+   "Sample: Dev":{d:"2026-11-24",e:{6:"slid",7:"stov",8:"flam",9:"tral",10:"chek",11:"flot",12:"glo",13:"brite",18:"shert",19:"sterm",20:"ners",21:"crad",22:"mouf",24:"stra",16:"pach",17:"fuj",14:"skrap",15:"splas",25:"rek",26:"nit",3:"thup",4:"clok"}}};
+  save();tTab="results";render()});
+}
+function results(tp){
+ const rows=S.roster.map(n=>[n,analyze(n)]);
+ const done=rows.filter(r=>r[1]);
+ const groups={};done.forEach(([n,a])=>{const k=a.start||"done";(groups[k]=groups[k]||[]).push(n)});
+ tp.innerHTML=`<p>${done.length} of ${S.roster.length} students have checked in. Tests counted: ${S.tests.slice().sort().join(", ")}.</p>
+ ${done.length?`<h2>Word-study groups</h2><p class="muted small">Each student's starting point is the first category they are still confusing.</p>
+ ${Object.keys(CATS).concat("done").filter(k=>groups[k]).map(k=>`<p><b>${k==="done"?"All categories mastered":esc(k+": "+CATS[k][0])}</b>: ${groups[k].map(esc).join(", ")}</p>`).join("")}`:""}
+ <h2>Class overview</h2><p class="muted small">M = mastered · U = using but confusing · N = not yet. Tap a name for the full report.</p>
+ <div class="scroll"><table><thead><tr><th>Student</th><th class="c">Words</th>${Object.keys(CATS).map(k=>`<th class="c" title="${esc(CATS[k][0])}">${k}</th>`).join("")}<th>Start here</th></tr></thead><tbody>
+ ${rows.map(([n,a],i)=>`<tr><td><button class="ghost" style="padding:0;min-height:32px;color:var(--blue)" data-i="${i}">${esc(n)}</button></td>${a?`<td class="c">${a.correct}/${a.given}</td>${Object.keys(CATS).map(k=>`<td class="c"><span class="st ${a.cats[k].st}">${a.cats[k].st==="X"?"–":a.cats[k].st}</span></td>`).join("")}<td>${a.start?esc(a.start+": "+CATS[a.start][0]):"Extend"}</td>`:`<td class="c muted" colspan="${Object.keys(CATS).length+2}">not yet</td>`}</tr>`).join("")}
+ </tbody></table></div>
+ <p class="small muted" style="margin-top:8px">${Object.entries(CATS).map(([k,v])=>`${k} = ${esc(v[0])}`).join(" · ")}</p>
+ <div class="bar noprint"><button id="dl">Download CSV</button><button id="cp">Copy CSV</button><button id="pr">Print</button><span class="small muted" id="cmsg"></span></div>`;
+ tp.querySelectorAll("tbody button").forEach(b=>b.onclick=()=>{openStudent=S.roster[b.dataset.i];render();scrollTo(0,0)});
+ const csv=()=>{const h=["Student","Date","Words correct","Words given","Feature points","Feature possible",...Object.keys(CATS).flatMap(k=>[k+" score",k+" status"]),"Start here","Misspellings"];
+  const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+  return [h,...S.roster.map(n=>{const a=analyze(n);if(!a)return[n];const s=S.subs[n];
+   return [n,a.date,a.correct,a.given,a.fp,a.fposs,...Object.keys(CATS).flatMap(k=>[a.cats[k].pts+"/"+a.cats[k].poss,a.cats[k].st]),a.start?a.start+" "+CATS[a.start][0]:"Extend",
+   Object.entries(s.e).map(([k,v])=>W[k-1][1]+"="+(v||"(blank)")).join("; ")]})].map(r=>r.map(q).join(",")).join("\n")};
+ document.getElementById("dl").onclick=()=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv()],{type:"text/csv"}));a.download="spelling-check-in.csv";document.body.appendChild(a);a.click();a.remove();document.getElementById("cmsg").textContent="If nothing downloaded, use Copy CSV."}catch(e){document.getElementById("cmsg").textContent="Download blocked here. Use Copy CSV."}};
+ document.getElementById("cp").onclick=()=>{navigator.clipboard.writeText(csv()).then(()=>document.getElementById("cmsg").textContent="Copied. Paste into a spreadsheet.",()=>document.getElementById("cmsg").textContent="Copy was blocked.")};
+ document.getElementById("pr").onclick=()=>{try{window.print()}catch(e){}};
+}
+function report(tp,n){
+ const a=analyze(n),s=S.subs[n];
+ if(!a){tp.innerHTML=`<p>${esc(n)} hasn't checked in yet.</p><button id="bk">All students</button>`;document.getElementById("bk").onclick=()=>{openStudent=null;render()};return}
+ const keys=Object.keys(CATS);
+ const needs=keys.filter(k=>a.cats[k].st==="U"||a.cats[k].st==="N");
+ tp.innerHTML=`<div class="noprint" style="margin-bottom:10px"><button id="bk">← All students</button> <button id="pr">Print</button> <button class="danger" id="del">Clear this student's results</button></div>
+ <h2 style="margin-top:4px">${esc(n)}</h2>
+ <p>Checked in ${esc(a.date)} · Words correct: <b>${a.correct} of ${a.given}</b> · Feature points: <b>${a.fp} of ${a.fposs}</b></p>
+ <div class="start">${a.start?`Start word study here: ${esc(a.start)}. ${esc(CATS[a.start][0])}`:`Every tested category is mastered. Extend with harder derivational words (Greek and Latin roots, related-word families).`}</div>
+ <h3>Needs</h3>
+ ${needs.length?needs.map(k=>{const c=a.cats[k];return `<div class="need ${c.st}"><b>${esc(k)}. ${esc(CATS[k][0])}</b>: ${stName[c.st]} (${c.pts} of ${c.poss})
+  <ul>${c.miss.map(m=>`<li>${esc(m.label)}: wrote <span class="ev">${esc(m.a)}</span> for <b>${esc(m.word)}</b></li>`).join("")}</ul>
+  <span class="small">Teaching idea: ${esc(CATS[k][1])}</span></div>`}).join("")
+  :`<p>No categories need direct teaching.</p>`}
+ ${keys.some(k=>a.cats[k].st==="M"&&a.cats[k].miss.length)?`<h3>Mastered, with one slip</h3><ul>${keys.filter(k=>a.cats[k].st==="M"&&a.cats[k].miss.length).map(k=>a.cats[k].miss.map(m=>`<li>${esc(k)}. ${esc(m.label)}: wrote <span class="ev">${esc(m.a)}</span> for <b>${esc(m.word)}</b></li>`).join("")).join("")}</ul>`:""}
+ ${a.other.length?`<h3>Other misspellings to look at</h3><p class="small muted">The tested features were right, but something else was off.</p><ul>${a.other.map(o=>`<li>wrote <span class="ev">${esc(o.a)}</span> for <b>${esc(o.word)}</b></li>`).join("")}</ul>`:""}
+ <h3>Category summary</h3>
+ <div class="scroll"><table><thead><tr><th>Category</th><th class="c">Score</th><th>Status</th></tr></thead><tbody>
+ ${keys.map(k=>`<tr><td>${esc(k)}. ${esc(CATS[k][0])}</td><td class="c">${a.cats[k].poss?a.cats[k].pts+"/"+a.cats[k].poss:"–"}</td><td><span class="st ${a.cats[k].st}">${stName[a.cats[k].st]}</span></td></tr>`).join("")}
+ </tbody></table></div>`;
+ document.getElementById("bk").onclick=()=>{openStudent=null;render()};
+ document.getElementById("pr").onclick=()=>{try{window.print()}catch(e){}};
+ document.getElementById("del").onclick=()=>ask(`Clear ${n}'s results so they can redo it?`,"Clear",()=>{delete S.subs[n];save();openStudent=null;render()});
+}
+render();
+}
+</script>
+</body>
+</html>
