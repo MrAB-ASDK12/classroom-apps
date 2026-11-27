@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Zoe’s Spelling Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#d35400;--accent-soft:#fcebdc;--ink:#1f2433;--muted:#5d6475;--bg:#fbf7f0;--card:#fff;--line:#e8e1d4;--good:#1f9d55;--goodbg:#e3f6ea;--bad:#c2410c;--badbg:#fdeee4;}
+*{box-sizing:border-box}
+body{margin:0;font-family:Lexend,"Trebuchet MS",system-ui,sans-serif;color:var(--ink);background:var(--bg);font-size:18px;line-height:1.5}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:980px;margin:0 auto;padding:24px 20px 60px}
+header.hero{background:var(--accent);color:#fff;border-radius:28px;padding:28px 30px;position:relative;overflow:hidden}
+header.hero h1{margin:0;font-size:2.3rem;line-height:1.1;font-weight:800}
+header.hero p{margin:.5rem 0 0;font-size:1.05rem;opacity:.95;max-width:34rem}
+.hero .stars{position:absolute;right:26px;top:24px;background:rgba(255,255,255,.18);border-radius:999px;padding:8px 16px;font-weight:600;font-size:1.1rem}
+.hero .blob{position:absolute;right:-40px;bottom:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.12)}
+h2{font-size:1.4rem;margin:2rem 0 .8rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--goodbg);color:#14653a;border-radius:999px;padding:6px 14px;font-size:.95rem;font-weight:600}
+.missions{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.mcard{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:20px;text-align:left;display:flex;flex-direction:column;gap:6px;transition:transform .1s,border-color .1s}
+.mcard:hover{transform:translateY(-2px);border-color:var(--accent)}
+.mcard .emo{font-size:2.2rem}
+.mcard .tag{font-size:.8rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.mcard h3{margin:0;font-size:1.25rem}
+.mcard .sub{color:var(--muted);font-size:.95rem}
+.mcard .prog{margin-top:auto;padding-top:8px;font-size:1.2rem;letter-spacing:2px}
+.mcard.start{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:26px;padding:24px;margin-top:8px}
+.back{background:none;border:none;color:var(--accent);font-weight:600;padding:0;margin-bottom:10px}
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 20px}
+.step{border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-weight:600;color:var(--muted)}
+.step.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.step.done::after{content:" ⭐"}
+.lcard{background:var(--accent-soft);border-radius:18px;padding:16px 18px;margin-bottom:12px}
+.lcard h4{margin:0 0 4px;font-size:1.1rem}
+.lcard p{margin:0 0 10px}
+.ex{display:flex;flex-wrap:wrap;gap:8px}
+.exw{background:#fff;border-radius:12px;padding:6px 12px;font-size:1.1rem;display:inline-flex;align-items:center;gap:6px;border:none}
+mark{background:#ffe27a;border-radius:3px;padding:0 1px;margin:0 -1px;color:inherit}
+.big{font-size:2.4rem;font-weight:800;letter-spacing:.04em;text-align:center;margin:10px 0}
+.prompt{font-size:1.5rem;text-align:center;margin:10px 0 18px}
+.opts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.opt{min-width:110px;font-size:1.4rem;font-weight:600;padding:14px 22px;border-radius:18px;border:3px solid var(--line);background:#fff}
+.opt:hover{border-color:var(--accent)}
+.opt.right{background:var(--goodbg);border-color:var(--good)}
+.opt.wrong{background:var(--badbg);border-color:var(--bad)}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:16px;padding:12px 22px;font-weight:600;font-size:1.1rem}
+.btn.ghost{background:#fff;color:var(--accent);border:2px solid var(--accent)}
+.say{background:#fff;border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-size:1rem}
+.row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:16px}
+input.spell{font:inherit;font-size:1.8rem;text-align:center;padding:10px 14px;border-radius:16px;border:3px solid var(--line);width:min(420px,100%);letter-spacing:.05em}
+input.spell:focus{outline:none;border-color:var(--accent)}
+.fb{min-height:2.2em;text-align:center;font-weight:600;margin-top:12px}
+.fb.good{color:var(--good)}.fb.bad{color:var(--bad)}
+.count{text-align:center;color:var(--muted);font-size:.95rem}
+.pool{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:56px;padding:12px;border:2px dashed var(--line);border-radius:18px;margin-bottom:16px}
+.wchip{font-size:1.2rem;padding:8px 16px;border-radius:14px;border:2px solid var(--line);background:#fff;font-weight:600}
+.wchip.sel{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.06)}
+.wchip.placed{background:var(--goodbg);border-color:var(--good);cursor:default}
+.wchip.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.cols{display:grid;gap:12px}
+.col{border:3px solid var(--line);border-radius:18px;padding:10px;min-height:140px;background:#fff;text-align:center}
+.col h5{margin:4px 0 10px;font-size:1rem}
+.col .placedlist{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.col.armed{border-color:var(--accent);cursor:pointer}
+.done-box{text-align:center;padding:20px}
+.done-box .emo{font-size:3.5rem}
+.watch{display:flex;flex-wrap:wrap;gap:10px}
+footer{margin-top:40px;color:var(--muted);font-size:.85rem;text-align:center}
+@media (max-width:600px){header.hero h1{font-size:1.8rem}.hero .stars{position:static;display:inline-block;margin-top:12px}.big{font-size:1.9rem}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const D = {"id": "zoe", "name": "Zoe", "intro": "These missions were made just for you from your spelling check-in. Start with the one marked “Start here.”", "teacher": "Mr. AB", "date": "November 25", "assumed": false, "missions": [{"cat": "A", "name": "Silent Letter Detectives", "emoji": "🕵️", "blurb": "Some letters hide! You can’t hear them, but they still have to be written.", "start": true, "learn": [{"tag": "wr", "title": "The sneaky w in wr", "text": "When a word starts with the sound /r/ and is spelled wr, the w is silent. You write it, but you don’t say it.", "ex": ["wreck|wr", "write|wr", "wrist|wr", "wrong|wr"]}, {"tag": "kn", "title": "The quiet k in kn", "text": "In kn, the k is silent and you only hear /n/. Long ago people said the k out loud. Now it just sits there quietly.", "ex": ["knight|kn", "knee|kn", "knife|kn", "knock|kn"]}, {"tag": "kn", "title": "Sound-alike words", "text": "Some words sound the same but mean different things. The silent letter tells you which word it is: a knight wears armor, and night is when it’s dark.", "ex": ["knight|kn", "night|n", "write|wr", "right|r"]}], "acts": [{"type": "sort", "title": "Sort the silent letters", "cols": ["silent w (wr)", "silent k (kn)"], "words": [["wrap", 0], ["wrist", 0], ["wrong", 0], ["write", 0], ["wrench", 0], ["wreath", 0], ["knee", 1], ["knot", 1], ["knife", 1], ["knock", 1], ["kneel", 1], ["know", 1]]}, {"type": "choose", "title": "Which word fits?", "items": [{"p": "The ___ rode a horse into the castle.", "o": ["knight", "night"], "a": "knight", "tag": "kn"}, {"p": "I sleep at ___.", "o": ["knight", "night"], "a": "night", "tag": "kn"}, {"p": "Please ___ your name at the top.", "o": ["write", "right"], "a": "write", "tag": "wr"}, {"p": "Turn ___ at the corner.", "o": ["write", "right"], "a": "right", "tag": "wr"}, {"p": "Tie a ___ in the rope.", "o": ["knot", "not"], "a": "knot", "tag": "kn"}, {"p": "The ship hit a rock and was a ___.", "o": ["wreck", "reck"], "a": "wreck", "tag": "wr"}, {"p": "Do you ___ the answer?", "o": ["know", "no"], "a": "know", "tag": "kn"}, {"p": "___ the present in pretty paper.", "o": ["Wrap", "Rap"], "a": "Wrap", "tag": "wr"}]}], "spell": [["wreck", "wr"], ["knight", "kn"], ["write", "wr"], ["knee", "kn"], ["wrist", "wr"], ["knock", "kn"], ["wrong", "wr"], ["knife", "kn"]], "words": [{"w": "wreck", "c": "wr"}, {"w": "knight", "c": "kn"}]}, {"cat": "E", "name": "Bossy R & ow/ou", "emoji": "🦉", "blurb": "Some vowels change their sound: R bosses them around, and ow and ou say “ow!”", "start": false, "learn": [{"tag": "ir", "title": "Bossy R: ir, ur and er", "text": "ir, ur and er can all say /er/, like in her. Learn which one each word uses.", "ex": ["shirt|ir", "bird|ir", "nurse|ur", "turn|ur", "her|er", "fern|er"]}, {"tag": "ir", "title": "or says /or/", "text": "or usually says /or/ like in storm, fork and corn.", "ex": ["storm|or", "fork|or", "corn|or"]}, {"tag": "ow", "title": "ow or ou?", "text": "Both say /ow/ like when you bump your toe. Use ow at the end of a word and before n, l or d (cow, town, owl, crowd). Most other times, use ou in the middle (mouth, cloud).", "ex": ["cow|ow", "crowd|ow", "town|ow", "mouth|ou", "cloud|ou", "shout|ou"]}], "acts": [{"type": "sort", "title": "ow or ou?", "cols": ["ow", "ou"], "words": [["cow", 0], ["crowd", 0], ["town", 0], ["owl", 0], ["brown", 0], ["howl", 0], ["mouth", 1], ["cloud", 1], ["shout", 1], ["house", 1], ["round", 1], ["count", 1]]}, {"type": "choose", "title": "Pick the bossy R team", "items": [{"p": "sh___t  (you wear it on top)", "o": ["ir", "ur", "or"], "a": "ir", "say": "shirt", "tag": "ir"}, {"p": "b___d  (it has feathers)", "o": ["ir", "ur", "er"], "a": "ir", "say": "bird", "tag": "ir"}, {"p": "n___se  (works in a hospital)", "o": ["ir", "ur", "er"], "a": "ur", "say": "nurse", "tag": "ir"}, {"p": "f___st  (number one)", "o": ["ir", "ur", "er"], "a": "ir", "say": "first", "tag": "ir"}, {"p": "cr___d  (lots of people)", "o": ["ow", "ou"], "a": "ow", "say": "crowd", "tag": "ow"}, {"p": "cl___d  (white and fluffy in the sky)", "o": ["ow", "ou"], "a": "ou", "say": "cloud", "tag": "ow"}, {"p": "t___n  (a small city)", "o": ["ow", "ou"], "a": "ow", "say": "town", "tag": "ow"}, {"p": "sh___t  (to yell loudly)", "o": ["ow", "ou"], "a": "ou", "say": "shout", "tag": "ow"}]}], "spell": [["shirt", "ir"], ["crowd", "ow"], ["bird", "ir"], ["mouth", "ou"], ["girl", "ir"], ["town", "ow"], ["first", "ir"], ["cloud", "ou"]], "words": [{"w": "shirt", "c": "ir"}, {"w": "crowd", "c": "ow"}]}, {"cat": "G", "name": "Two-Syllable Words", "emoji": "🧩", "blurb": "Longer words come in chunks. Each chunk has its own spelling tricks.", "start": false, "learn": [{"tag": "dbl", "title": "Double in the middle?", "text": "Clap the word. If the first chunk has a short vowel, double the middle consonant: rab-bit. If it has a long vowel, use just one: ti-ger.", "ex": ["rabbit|bb", "puppy|pp", "tiger|g", "paper|p"]}, {"tag": "aror", "title": "The /er/ at the end: -ar, -or or -er", "text": "They all sound the same at the end of a word, so you have to learn which one each word uses. Hint: -or is often a person who does a job: doctor, actor, sailor.", "ex": ["dollar|ar", "collar|ar", "doctor|or", "actor|or", "teacher|er"]}], "acts": [{"type": "choose", "title": "Pick the missing chunk", "items": [{"p": "doll___  (money: 100 cents)", "o": ["ar", "or", "er"], "a": "ar", "say": "dollar", "tag": "aror"}, {"p": "doct___  (checks you when you’re sick)", "o": ["ar", "or", "er"], "a": "or", "say": "doctor", "tag": "aror"}, {"p": "act___  (a person in a play)", "o": ["ar", "or", "er"], "a": "or", "say": "actor", "tag": "aror"}, {"p": "coll___  (it goes around a dog’s neck)", "o": ["ar", "or", "er"], "a": "ar", "say": "collar", "tag": "aror"}, {"p": "sug___  (it makes things sweet)", "o": ["ar", "or", "er"], "a": "ar", "say": "sugar", "tag": "aror"}, {"p": "sail___  (works on a ship)", "o": ["ar", "or", "er"], "a": "or", "say": "sailor", "tag": "aror"}, {"p": "teach___  (works at your school)", "o": ["ar", "or", "er"], "a": "er", "say": "teacher", "tag": "aror"}, {"p": "ra___it  (a bunny)", "o": ["bb", "b"], "a": "bb", "say": "rabbit", "tag": "dbl"}]}, {"type": "sort", "title": "Double or single?", "cols": ["short vowel → double (rab-bit)", "long vowel → single (ti-ger)"], "words": [["rabbit", 0], ["puppy", 0], ["happy", 0], ["kitten", 0], ["letter", 0], ["puddle", 0], ["tiger", 1], ["paper", 1], ["baby", 1], ["robot", 1], ["music", 1], ["spider", 1]]}], "spell": [["rabbit", "bb"], ["dollar", "ar"], ["doctor", "or"], ["collar", "ar"], ["actor", "or"], ["tiger", "g"], ["sugar", "ar"], ["happy", "pp"]], "words": [{"w": "rabbit", "c": "bb"}, {"w": "dollar", "c": "ar"}, {"w": "doctor", "c": "or"}]}, {"cat": "I", "name": "Word Families", "emoji": "🌳", "blurb": "Big words grow from smaller base words. Find the base word and the spelling makes sense.", "start": false, "learn": [{"tag": "cian", "title": "-cian is a person", "text": "A person who does music is a musician. The c from music stays: musi-c-ian. Same with magic → magician and electric → electrician.", "ex": ["music → musician|cian", "magic → magician|cian", "electric → electrician|cian"]}, {"tag": "sion", "title": "d or de turns into -sion", "text": "When the base word ends in d or de, the new word often ends in -sion: explode → explosion, decide → decision.", "ex": ["explode → explosion|sion", "decide → decision|sion", "divide → division|sion"]}, {"tag": "family", "title": "Family secrets", "text": "A relative word can tell you a hidden letter. You can’t hear the n in autumn, but you hear it in autumnal. Compete helps with competition: compet-i-tion.", "ex": ["autumn → autumnal|n", "column → columnist|n", "compete → competition|compet"]}, {"tag": "able", "title": "-able or -ible?", "text": "If you can see a whole word before the ending, it is usually -able: comfort + able. If the part before it is not a word by itself, it is often -ible: vis + ible.", "ex": ["comfort → comfortable|able", "enjoy → enjoyable|able", "visible|ible", "terrible|ible"]}, {"tag": "sure", "title": "The -sure ending", "text": "-sure says /zhur/ at the end of these words: pleasure, treasure, measure.", "ex": ["pleasure|sure", "treasure|sure", "measure|sure"]}], "acts": [{"type": "choose", "title": "Grow the word", "items": [{"p": "music → musi___  (a person who plays music)", "o": ["cian", "tion", "sion"], "a": "cian", "say": "musician", "tag": "cian"}, {"p": "explode → explo___", "o": ["sion", "tion", "cian"], "a": "sion", "say": "explosion", "tag": "sion"}, {"p": "compete → compet___tion", "o": ["i", "e", "a"], "a": "i", "say": "competition", "tag": "family"}, {"p": "comfort → comfort___", "o": ["able", "ible"], "a": "able", "say": "comfortable", "tag": "able"}, {"p": "vis___  (you can see it)", "o": ["ible", "able"], "a": "ible", "say": "visible", "tag": "able"}, {"p": "autu___  (the season after summer)", "o": ["mn", "m"], "a": "mn", "say": "autumn", "tag": "family"}, {"p": "magic → magi___", "o": ["cian", "tion", "sion"], "a": "cian", "say": "magician", "tag": "cian"}, {"p": "decide → deci___", "o": ["sion", "tion"], "a": "sion", "say": "decision", "tag": "sion"}]}, {"type": "sort", "title": "-tion, -sion or -cian?", "cols": ["-tion", "-sion", "-cian (a person)"], "words": [["action", 0], ["competition", 0], ["invention", 0], ["direction", 0], ["explosion", 1], ["decision", 1], ["division", 1], ["television", 1], ["musician", 2], ["magician", 2], ["electrician", 2], ["optician", 2]]}], "spell": [["pleasure", "sure"], ["explosion", "sion"], ["comfortable", "able"], ["visible", "ible"], ["musician", "cian"], ["competition", "ition"], ["autumn", "mn"], ["magician", "cian"]], "words": [{"w": "pleasure", "c": "sure"}, {"w": "explosion", "c": "sion"}, {"w": "comfortable", "c": "able"}, {"w": "visible", "c": "ible"}, {"w": "musician", "c": "cian"}, {"w": "competition", "c": "ition"}, {"w": "autumn", "c": "mn"}]}, {"cat": "R", "name": "Quick Review", "emoji": "🎯", "review": true, "start": false, "blurb": "You know these patterns. Just lock in the exact spelling of these words.", "learn": [{"title": "Almost perfect!", "text": "On the check-in, you knew how these patterns work, but one or two letters slipped. Study the yellow parts.", "ex": ["fudge|dge", "babies|ies", "hopeless|hope", "unfriendly|ie", "preview|pre"]}], "acts": [], "spell": [["fudge", "dge"], ["babies", "ies"], ["hopeless", "hope"], ["unfriendly", "ie"], ["preview", "pre"]], "words": []}], "strengths": ["Short vowels", "Word endings (ck, tch, dge)", "Long vowel teams", "Adding endings", "Prefixes & suffixes"], "watch": ["wreck", "knight", "shirt", "crowd", "rabbit", "dollar", "doctor", "pleasure", "explosion", "comfortable", "visible", "musician", "competition", "autumn", "fudge", "babies", "hopeless", "unfriendly", "preview"], "hints": {"double": "Short vowel and one consonant at the end? Double the last letter.", "dropE": "Does the base word end in a silent e? Drop it before -ing or -ed.", "yi": "Consonant + y at the end? Change the y to i.", "es": "Words ending in x, s, ch or sh add -es.", "keepE": "Endings that start with a consonant keep the base word’s e.", "pre": "Prefixes stick on the front without changing anything.", "tion": "Keep every letter of the base word, then add -ion."}};
+const KEY = 'spelling-studio-' + D.id;
+let S = {stars:{}};
+try { S = JSON.parse(localStorage.getItem(KEY)) || S; } catch(e) {}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+const app = document.getElementById('app');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const canSpeak = 'speechSynthesis' in window;
+function speak(t){ if(!canSpeak) return; try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = .8; speechSynthesis.speak(u);}catch(e){} }
+function hl(word, chunk){
+  if(!chunk) return esc(word);
+  const i = word.toLowerCase().lastIndexOf(chunk.toLowerCase());
+  if(i<0) return esc(word);
+  return esc(word.slice(0,i)) + '<mark>' + esc(word.slice(i,i+chunk.length)) + '</mark>' + esc(word.slice(i+chunk.length));
+}
+function exHTML(e){ // "hop → hopping|pp"
+  const [txt, chunk] = e.split('|');
+  const parts = txt.split(' ');
+  const target = txt.includes('→') ? txt.split('→')[1].trim() : (txt.includes('=') ? txt.split('=')[1].trim() : txt);
+  const shown = txt.replace(target, '\u0000');
+  return `<button class="exw" data-say="${esc(target)}"><span>${esc(shown).replace('\u0000', hl(target, chunk))}</span>${canSpeak?' 🔊':''}</button>`;
+}
+function totalStars(){ return Object.values(S.stars).filter(Boolean).length; }
+function maxStars(){ return D.missions.reduce((n,m)=>n+m.acts.length+2,0); }
+function mStars(mi){ const m=D.missions[mi]; let n=0; for(let a=0;a<m.acts.length+2;a++) if(S.stars[mi+'-'+a]) n++; return n; }
+
+function home(){
+  const strengths = D.strengths.length ? `<h2>💪 You’ve got these</h2><div class="chips">${D.strengths.map(s=>`<span class="chip">✓ ${esc(s)}</span>`).join('')}</div>` : '';
+  app.innerHTML = `
+  <header class="hero"><div class="blob"></div>
+    <h1>${esc(D.name)}’s Spelling Studio</h1>
+    <p>${esc(D.intro)}</p>
+    <div class="stars">⭐ ${totalStars()} / ${maxStars()}</div>
+  </header>
+  ${strengths}
+  <h2>🚀 Your missions</h2>
+  <div class="missions">${D.missions.map((m,i)=>{
+    const n = m.acts.length+2, got = mStars(i);
+    return `<button class="mcard ${m.start?'start':''}" data-m="${i}">
+      <span class="emo">${m.emoji}</span>
+      <span class="tag">${m.start?'Start here':(m.review?'Bonus':'Mission '+(i+1))}</span>
+      <h3>${esc(m.name)}</h3>
+      <span class="sub">${esc(m.blurb)}</span>
+      <span class="prog">${'⭐'.repeat(got)}${'☆'.repeat(n-got)}</span>
+    </button>`}).join('')}</div>
+  ${D.watch.length?`<h2>👀 My words to watch</h2><div class="watch">${D.watch.map(w=>`<button class="exw" data-say="${esc(w)}">${esc(w)} ${canSpeak?'🔊':''}</button>`).join('')}</div>`:''}
+  <footer>Made for ${esc(D.name)} by ${esc(D.teacher)}${D.assumed?'':' '}${D.assumed?'':'from the '+esc(D.date)+' spelling check-in'}. Your stars are saved on this computer.</footer>`;
+  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>mission(+b.dataset.m,0));
+  wireSay();
+}
+function wireSay(){ app.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>speak(b.dataset.say)); }
+
+function mission(mi, step){
+  const m = D.missions[mi];
+  const names = ['Learn', ...m.acts.map(a=>a.title), 'Spell it'];
+  app.innerHTML = `<button class="back">← All missions</button>
+   <div class="panel">
+    <div style="display:flex;align-items:center;gap:12px"><span style="font-size:2.4rem">${m.emoji}</span><div><h2 style="margin:0">${esc(m.name)}</h2><div style="color:var(--muted)">${esc(m.blurb)}</div></div></div>
+    <div class="steps">${names.map((n,i)=>`<button class="step ${i===step?'on':''} ${S.stars[mi+'-'+i]?'done':''}" data-s="${i}">${i+1}. ${esc(n)}</button>`).join('')}</div>
+    <div id="stage"></div>
+   </div>`;
+  app.querySelector('.back').onclick = home;
+  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>mission(mi,+b.dataset.s));
+  const stage = app.querySelector('#stage');
+  const finish = () => { S.stars[mi+'-'+step]=true; save();
+    const last = step === names.length-1;
+    stage.innerHTML = `<div class="done-box"><div class="emo">🌟</div><h3>You earned a star!</h3>
+      <div class="row">${last?`<button class="btn" id="nx">Back to my missions</button>`:`<button class="btn" id="nx">Next: ${esc(names[step+1])} →</button>`}</div></div>`;
+    stage.querySelector('#nx').onclick = () => last ? home() : mission(mi, step+1);
+    app.querySelectorAll('.step')[step].classList.add('done');
+  };
+  if(step===0) learn(stage, m, finish);
+  else if(step===names.length-1) spell(stage, m.spell, finish);
+  else { const a = m.acts[step-1]; ({sort, choose, build})[a.type](stage, a, finish); }
+}
+
+function learn(stage, m, finish){
+  stage.innerHTML = m.learn.map(l=>`<div class="lcard"><h4>${esc(l.title)}</h4><p>${esc(l.text)}</p><div class="ex">${l.ex.map(exHTML).join('')}</div></div>`).join('') +
+   (m.words.length?`<div class="lcard" style="background:#fff;border:2px dashed var(--line)"><h4>${D.assumed?'Words from the check-in':'Words from your check-in'}</h4><p>These are the check-in words that use this pattern. Look closely at the yellow part.</p><div class="ex">${m.words.map(w=>`<button class="exw" data-say="${esc(w.w)}"><span>${hl(w.w,w.c)}</span>${canSpeak?' 🔊':''}</button>`).join('')}</div></div>`:'') +
+   `<div class="row"><button class="btn" id="got">I’ve got it! ⭐</button></div>`;
+  wireSayIn(stage);
+  stage.querySelector('#got').onclick = finish;
+}
+function wireSayIn(el){ el.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>speak(b.dataset.say)); }
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function sort(stage, a, finish){
+  const words = shuffle(a.words); let sel = null; const placed = a.cols.map(()=>[]);
+  const draw = () => {
+    const left = words.filter(w=>!w.done);
+    stage.innerHTML = `<p class="count">Tap a word, then tap the box where it belongs.</p>
+      <div class="pool">${left.length?left.map((w,i)=>`<button class="wchip ${sel===w?'sel':''}" data-i="${words.indexOf(w)}">${esc(w[0])}</button>`).join(''):'<span style="color:var(--muted)">All sorted!</span>'}</div>
+      <div class="cols" style="grid-template-columns:repeat(${a.cols.length},1fr)">${a.cols.map((c,ci)=>`<div class="col ${sel?'armed':''}" data-c="${ci}"><h5>${esc(c)}</h5><div class="placedlist">${placed[ci].map(w=>`<span class="wchip placed">${esc(w)}</span>`).join('')}</div></div>`).join('')}</div>
+      <div class="fb" id="fb"></div>`;
+    stage.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{ sel = words[+b.dataset.i]; speak(sel[0]); draw(); });
+    stage.querySelectorAll('[data-c]').forEach(c=>c.onclick=()=>{
+      if(!sel) return; const ci=+c.dataset.c;
+      if(sel[1]===ci){ sel.done=true; placed[ci].push(sel[0]); sel=null; draw(); if(words.every(w=>w.done)) setTimeout(finish,600); }
+      else { const w=sel; draw(); const fb=stage.querySelector('#fb'); fb.className='fb bad'; fb.textContent = `Hmm, look at “${w[0]}” again. Where does it belong?`;
+        const chip=[...stage.querySelectorAll('[data-i]')].find(b=>words[+b.dataset.i]===w); if(chip){chip.classList.add('shake','sel');} }
+    });
+  };
+  draw();
+}
+
+function choose(stage, a, finish){
+  let i=0, wrongs=0;
+  const draw = () => {
+    const it = a.items[i];
+    stage.innerHTML = `<p class="count">${i+1} of ${a.items.length}</p>
+      <div class="prompt">${esc(it.p).replace('___','<b style="color:var(--accent)">___</b>')}</div>
+      ${it.say&&canSpeak?`<div class="row" style="margin:0 0 14px"><button class="say" id="hear">🔊 Hear the word</button></div>`:''}
+      <div class="opts">${shuffle(it.o).map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+      <div class="fb" id="fb"></div>`;
+    const h=stage.querySelector('#hear'); if(h) h.onclick=()=>speak(it.say);
+    stage.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const fb=stage.querySelector('#fb');
+      if(b.dataset.o===it.a){ b.classList.add('right'); fb.className='fb good'; fb.innerHTML = `Yes! ${it.say?'<b>'+esc(it.say)+'</b>':''} ✓`; if(it.say) speak(it.say);
+        stage.querySelectorAll('.opt').forEach(x=>x.disabled=true);
+        setTimeout(()=>{ i++; i<a.items.length?draw():finish(); }, 1100); }
+      else { b.classList.add('wrong'); b.disabled=true; fb.className='fb bad'; fb.textContent='Not that one. Try again!'; }
+    });
+  };
+  draw();
+}
+
+function build(stage, a, finish){
+  let i=0, tries=0;
+  const draw = () => {
+    const it = a.items[i]; tries=0;
+    stage.innerHTML = `<p class="count">${i+1} of ${a.items.length}</p>
+      <div class="big" style="font-size:2rem">${esc(it.p)} = ?</div>
+      <div class="row"><input class="spell" id="in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type the new word"></div>
+      <div class="row"><button class="btn" id="ck">Check</button></div>
+      <div class="fb" id="fb"></div>`;
+    const inp=stage.querySelector('#in'); inp.focus();
+    const go=()=>{
+      const v=inp.value.trim().toLowerCase(); if(!v) return; const fb=stage.querySelector('#fb');
+      if(v===it.a){ fb.className='fb good'; fb.innerHTML=`Perfect: <b>${esc(it.a)}</b> ✓`; speak(it.a); inp.disabled=true; setTimeout(()=>{ i++; i<a.items.length?draw():finish(); },1200); }
+      else { tries++; fb.className='fb bad';
+        fb.innerHTML = tries<2 ? `Almost! ${esc(D.hints[it.tag]||'Check the rule and try again.')}` : `It’s <b>${esc(it.a)}</b>. Type it once to lock it in.`;
+        inp.select(); }
+    };
+    stage.querySelector('#ck').onclick=go; inp.onkeydown=e=>{ if(e.key==='Enter') go(); };
+  };
+  draw();
+}
+
+function spell(stage, list, finish){
+  let i=0;
+  const look = () => {
+    const [w,c] = list[i];
+    stage.innerHTML = `<p class="count">Word ${i+1} of ${list.length} · Look, say, cover, write, check</p>
+      <div class="big">${hl(w,c)}</div>
+      <div class="row">${canSpeak?`<button class="say" id="hear">🔊 Hear it</button>`:''}<button class="btn" id="cov">Cover it and write it →</button></div>`;
+    if(canSpeak){ stage.querySelector('#hear').onclick=()=>speak(w); speak(w); }
+    stage.querySelector('#cov').onclick=write;
+  };
+  const write = () => {
+    const [w,c] = list[i]; let tries=0;
+    stage.innerHTML = `<p class="count">Word ${i+1} of ${list.length}</p>
+      <div class="big" style="color:var(--line)">? ? ?</div>
+      <div class="row"><input class="spell" id="in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="write it from memory"></div>
+      <div class="row">${canSpeak?`<button class="say" id="hear">🔊 Hear it again</button>`:''}<button class="btn" id="ck">Check</button></div>
+      <div class="fb" id="fb"></div>`;
+    const inp=stage.querySelector('#in'); inp.focus();
+    if(canSpeak) stage.querySelector('#hear').onclick=()=>speak(w);
+    const go=()=>{
+      const v=inp.value.trim().toLowerCase(); if(!v) return; const fb=stage.querySelector('#fb');
+      if(v===w.toLowerCase()){ fb.className='fb good'; fb.innerHTML=`You got it! ${hl(w,c)} ✓`; inp.disabled=true; setTimeout(()=>{ i++; i<list.length?look():finish(); },1100); }
+      else { tries++; fb.className='fb bad';
+        if(tries<2){ fb.textContent='Not quite. Picture the word and try once more.'; inp.select(); }
+        else { fb.innerHTML=`Let’s look again.`; setTimeout(look, 1100); } }
+    };
+    stage.querySelector('#ck').onclick=go; inp.onkeydown=e=>{ if(e.key==='Enter') go(); };
+  };
+  look();
+}
+home();
+</script>
+</body>
+</html>
