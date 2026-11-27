@@ -11,6 +11,7 @@ Small, free classroom tools built with Claude by a working teacher. There are no
 | Math Check-In (previews and setup guide) | `math-check-in/` | The teacher's own Google Sheet |
 | The +30 Button | `plus30/` | Nothing |
 | Spelling Check-In (plus printable diagnostic packet) | `spelling-check-in/` | The browser on the classroom computer (CSV export) |
+| Spelling Studio: how it was built (showcase page only, not a usable app) | `spelling-studio-story/` | Nothing |
 
 Every app is a single, self-contained HTML file. To change an app, replace its `index.html` and commit.
 
