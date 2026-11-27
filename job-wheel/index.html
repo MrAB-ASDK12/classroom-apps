@@ -150,7 +150,14 @@ if(!S||!Array.isArray(S.students))S=fresh();
 let undoState=null,spinning=false,rot=0,audio=null;
 let cloud=null,writing=false,dirty=false,wT;
 const setSync=t=>{$('sync').textContent=t};
-const local=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const local=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){setSync('This browser is not letting the app save. Copy your backup (Edit class & jobs) and check that this is not a private window.')}};
+/* Keep every open tab or window in step, so an older one can never overwrite newer changes. */
+function pullNewer(){let v=null;try{v=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(v&&Array.isArray(v.students)&&(v.updatedAt||0)>(S.updatedAt||0)&&!spinning){S=v;render()}}
+window.addEventListener('storage',e=>{if(e.key===KEY)pullNewer()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')pullNewer()});
+window.addEventListener('pageshow',e=>{if(e.persisted)pullNewer()});
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 async function push(){
   if(!cloud)return;
   if(writing){dirty=true;return}

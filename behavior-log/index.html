@@ -196,7 +196,9 @@ let S=defaults(), days={}, mode='loading', col=null;
 const LSK='behavior-log-v1';
 let mem=null;
 const lsGet=()=>{try{return JSON.parse(localStorage.getItem(LSK))}catch(e){return mem}};
-const lsSet=v=>{mem=v;try{localStorage.setItem(LSK,JSON.stringify(v))}catch(e){}};
+let saveFailed=false;
+const lsSet=v=>{mem=v;try{localStorage.setItem(LSK,JSON.stringify(v));if(saveFailed){saveFailed=false;banner('Saving works again.')}}
+  catch(e){saveFailed=true;banner('This browser is not letting the app save. New entries will be lost when you close it. Download a backup now (Class setup tab), and check that you are not in a private window.')}};
 const banner=t=>{$('#banner').textContent=t||''};
 
 /* ---------- persistence ---------- */
@@ -211,7 +213,24 @@ async function writeErr(e,key,fn){
   if(mode==='db'){goLocal('Your access to this app is view-only, so records are being saved in this browser on this device only. Ask the app owner for Contributor access to save them to your account.')}
 }
 function goLocal(msg){mode='local';persistLocal();banner(msg);renderAll()}
-function persistLocal(){lsSet({settings:S,days})}
+/* Merge with what is already saved, so a second tab or window can never erase entries made in another one. */
+const gone=new Set();
+function persistLocal(){
+  let cur=null;try{cur=JSON.parse(localStorage.getItem(LSK))}catch(e){}
+  if(cur&&cur.days){
+    for(const id of cur.gone||[])gone.add(id);
+    const have=new Set();for(const k in days)for(const e of days[k])have.add(e.id);
+    for(const k in cur.days)for(const e of cur.days[k])if(!have.has(e.id)&&!gone.has(e.id)){(days[k]=days[k]||[]).push(e);have.add(e.id)}
+    for(const k in days){days[k]=days[k].filter(e=>!gone.has(e.id)).sort((a,b)=>a.ts-b.ts);if(!days[k].length)delete days[k]}
+  }
+  lsSet({settings:S,days,gone:[...gone].slice(-2000),lastBackup:lastBackup||cur?.lastBackup||null});
+}
+let lastBackup=null;
+/* Another tab saved: pick up its changes right away. */
+function reloadFromStorage(){const saved=lsGet();if(!saved)return;applySettings(saved.settings);days=saved.days||{};for(const id of saved.gone||[])gone.add(id);lastBackup=saved.lastBackup||lastBackup;renderAll();if(!$('#v-trends').hidden)renderTrends()}
+window.addEventListener('storage',e=>{if(e.key===LSK&&mode==='local')reloadFromStorage()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&mode==='local')reloadFromStorage()});
+window.addEventListener('pageshow',e=>{if(e.persisted&&mode==='local')reloadFromStorage()});
 let sTimer=null,sDirty=0;
 function saveSettings(){
   if(mode==='local'){persistLocal();return}
@@ -233,7 +252,7 @@ function logIt(st,ty,li){
   toast(`${st.name}: ${ty.label} (${lv.label})`);renderToday();renderHistory();
 }
 function removeEntry(k,id){
-  if(!days[k])return;days[k]=days[k].filter(e=>e.id!==id);saveDay(k);renderToday();renderHistory();
+  if(!days[k])return;gone.add(id);days[k]=days[k].filter(e=>e.id!==id);saveDay(k);renderToday();renderHistory();
 }
 let tt=null;
 function toast(msg){$('#toast-msg').textContent='Logged · '+msg;$('#toast').classList.add('show');clearTimeout(tt);tt=setTimeout(()=>$('#toast').classList.remove('show'),6000)}
@@ -370,14 +389,23 @@ adder('#add-type','#new-type','types');adder('#add-level','#new-level','levels')
 
 /* ---------- start ---------- */
 function applySettings(v){if(!v)return;const d=defaults();S={className:v.className||'',students:Array.isArray(v.students)?v.students.map(s=>({...s})):[],types:Array.isArray(v.types)?v.types.map(t=>({...t})):d.types,levels:Array.isArray(v.levels)&&v.levels.length?v.levels.map(l=>({...l})):d.levels}}
-function startLocal(msg){mode='local';const saved=lsGet();if(saved){applySettings(saved.settings);days=saved.days||{}}banner(msg);renderAll()}
+function startLocal(msg){mode='local';const saved=lsGet();if(saved){applySettings(saved.settings);days=saved.days||{};for(const id of saved.gone||[])gone.add(id);lastBackup=saved.lastBackup||null}
+  banner(msg+backupNote());renderAll();
+  /* Ask the browser to treat this data as important so it is not cleared to free up space. */
+  try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+}
+function backupNote(){
+  const n=Object.values(days).reduce((s,a)=>s+a.length,0);if(!n)return'';
+  if(!lastBackup)return' You have '+n+' record'+(n===1?'':'s')+' and no backup yet.';
+  const age=Math.floor((Date.now()-lastBackup)/864e5);return age>=7?' Your last backup was '+age+' days ago.':'';
+}
 startLocal('Records are saved only in this browser on this device. Use Backup on the Class setup tab to keep a copy.');
 
 /* ---------- backup (stand-alone version) ---------- */
 document.getElementById('bk-save').addEventListener('click',()=>{
   const blob=new Blob([JSON.stringify({app:'behavior-log',v:1,savedAt:new Date().toISOString(),settings:S,days},null,1)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='behavior-log-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();
+  a.download='behavior-log-backup-'+new Date().toISOString().slice(0,10)+'.json';lastBackup=Date.now();persistLocal();banner('Backup downloaded. Keep the file somewhere safe, like your school drive.');document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
 });
 document.getElementById('bk-load').addEventListener('click',()=>document.getElementById('bk-file').click());
@@ -385,7 +413,7 @@ document.getElementById('bk-file').addEventListener('change',async e=>{
   const f=e.target.files[0];e.target.value='';if(!f)return;
   try{const d=JSON.parse(await f.text());if(d.app!=='behavior-log'||!d.settings)throw 0;
     if(!confirm('Replace everything in this browser with the backup from '+(d.savedAt||'').slice(0,10)+'?'))return;
-    applySettings(d.settings);days=d.days||{};persistLocal();renderAll();banner('Backup restored.');
+    applySettings(d.settings);days=d.days||{};gone.clear();lsSet({settings:S,days,gone:[],lastBackup:Date.now()});lastBackup=Date.now();renderAll();banner('Backup restored.');
   }catch(err){banner('That file is not a Behavior Log backup.')}
 });
 

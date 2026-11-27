@@ -1,4 +1,4 @@
-# Niche Classroom Apps
+# A Bespoke Suite of Apps
 
 Small, free classroom tools built with Claude by a working teacher. There are no logins and no cost, and student data stays in the teacher's own browser.
 
